@@ -109,3 +109,12 @@ tmp/
 **/venv/
 **/.venv/
 **/__pycache__/
+
+# Build outputs (all platforms)
+**/build/
+**/Build/
+
+# Xcode/Swift compilation caches
+**/ModuleCache.noindex/
+**/CompilationCache.noindex/
+**/XCBuildData/
