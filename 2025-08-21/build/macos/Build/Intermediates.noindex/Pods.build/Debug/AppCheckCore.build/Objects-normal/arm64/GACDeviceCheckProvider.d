@@ -1,0 +1,22 @@
+dependencies: \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/build/macos/Build/Intermediates.noindex/Pods.build/Debug/AppCheckCore.build/module.modulemap \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/DeviceCheckProvider/GACDeviceCheckProvider.m \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Public/AppCheckCore/GACAppCheckAvailability.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/TargetConditionals.modulemap \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/build/macos/Build/Intermediates.noindex/Pods.build/Debug/PromisesObjC.build/module.modulemap \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/PromisesObjC/Sources/FBLPromises/include/FBLPromises.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Public/AppCheckCore/GACDeviceCheckProvider.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Public/AppCheckCore/GACAppCheckProvider.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Core/APIService/GACAppCheckAPIService.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Public/AppCheckCore/GACAppAttestProvider.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Core/Backoff/GACAppCheckBackoffWrapper.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Core/Errors/GACAppCheckErrorUtil.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Core/GACAppCheckLogger+Internal.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Public/AppCheckCore/GACAppCheckErrors.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Public/AppCheckCore/GACAppCheckLogger.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/DeviceCheckProvider/API/GACDeviceCheckAPIService.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/DeviceCheckProvider/DCDevice+GACDeviceCheckTokenGenerator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/DeviceCheck.framework/Modules/module.modulemap \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/DeviceCheckProvider/GACDeviceCheckTokenGenerator.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/AppCheckCore/AppCheckCore/Sources/Public/AppCheckCore/GACAppCheckToken.h

@@ -1,0 +1,21 @@
+dependencies: \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/build/macos/Build/Intermediates.noindex/Pods.build/Debug/GTMAppAuth.build/module.modulemap \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/build/macos/Build/Intermediates.noindex/Pods.build/Debug/GoogleSignIn.build/module.modulemap \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDGoogleUser.m \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/Public/GoogleSignIn/GIDGoogleUser.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/TargetConditionals.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AppKit.framework/Modules/module.modulemap \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/build/macos/Build/Intermediates.noindex/Pods.build/Debug/GTMSessionFetcher.build/module.modulemap \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDGoogleUser_Private.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/build/macos/Build/Intermediates.noindex/Pods.build/Debug/AppAuth.build/module.modulemap \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/Public/GoogleSignIn/GIDConfiguration.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/Public/GoogleSignIn/GIDSignIn.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDAuthentication.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDEMMSupport.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDProfileData_Private.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/Public/GoogleSignIn/GIDProfileData.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDSignIn_Private.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDSignInPreferences.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/GIDToken_Private.h \
+  /Users/toshunmei/Desktop/Tarot/Tarot_Card_App/2025-08-21/macos/Pods/GoogleSignIn/GoogleSignIn/Sources/Public/GoogleSignIn/GIDToken.h
