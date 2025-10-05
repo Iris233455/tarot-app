@@ -110,3 +110,10 @@ ai_backend/.venv/**
 **/*.DS_Store
 **/*.log
 
+
+# Local development and temporary directories
+/.vscode/
+/ai_backend/.venv/
+/ai_backend/venv/
+/2025-08-21/
+/tmp/
