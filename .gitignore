@@ -100,4 +100,13 @@ coverage/
 *.lock
 pubspec.lock
 yarn.lock
-package-lock.json 
+package-lock.json 2025-08-21/**
+build/**
+ai_backend/.venv/**
+2025-08-21/build/**
+*.dSYM/**
+*.dSYM
+**/*.dSYM/**
+**/*.DS_Store
+**/*.log
+
