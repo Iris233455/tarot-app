@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BaseShopScreen extends StatefulWidget {
   final String shopUrl;
@@ -57,7 +59,7 @@ class _BaseShopScreenState extends State<BaseShopScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('読み込みエラー: ${error.description}'),
-                backgroundColor: Colors.red,
+                backgroundColor: DynamicTokens.textError,
               ),
             );
           },
@@ -74,25 +76,30 @@ class _BaseShopScreenState extends State<BaseShopScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(AppIcons.arrowBack),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          // 刷新按钮
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => _controller.reload(),
-          ),
-          // 快速登录按钮
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () => _navigateToLogin(),
-          ),
-          // 在外部浏览器中打开
-          IconButton(
-            icon: const Icon(Icons.open_in_browser),
-            onPressed: () => _showOpenInBrowserDialog(),
-          ),
+          Consumer(builder: (context, ref, __) {
+            final dt = ref.watch(dynamicTokensProvider);
+            return Row(children: [
+              IconButton(
+                icon: const Icon(AppIcons.refresh),
+                onPressed: () => _controller.reload(),
+                style: IconButton.styleFrom(foregroundColor: dt.textPrimary),
+              ),
+              IconButton(
+                icon: const Icon(AppIcons.accountCircle),
+                onPressed: () => _navigateToLogin(),
+                style: IconButton.styleFrom(foregroundColor: dt.textPrimary),
+              ),
+              IconButton(
+                icon: const Icon(AppIcons.openInBrowser),
+                onPressed: () => _showOpenInBrowserDialog(),
+                style: IconButton.styleFrom(foregroundColor: dt.primaryColor),
+              ),
+            ]);
+          }),
         ],
       ),
       body: Stack(
@@ -102,37 +109,47 @@ class _BaseShopScreenState extends State<BaseShopScreen> {
           
           // 加载指示器
           if (_isLoading)
-            Container(
-              color: Colors.white.withOpacity(0.8),
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text(
-                      '店舗を読み込み中...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
+            Consumer(
+              builder: (context, ref, __) {
+                final dt = ref.watch(dynamicTokensProvider);
+                return Container(
+                  color: (dt.isDark || dt.backgroundImage != null)
+                      ? Colors.black.withOpacity(0.35)
+                      : dt.surfaceColor.withOpacity(0.85),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(dt.primaryColor),
+                          strokeWidth: 3,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '店舗を読み込み中...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: dt.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
         ],
       ),
       // 底部导航栏（可选）
       bottomNavigationBar: Container(
         height: 60,
-        color: Theme.of(context).colorScheme.surface,
+        color: DynamicTokens.textWhite,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             // 返回按钮
             IconButton(
-              icon: const Icon(Icons.arrow_back_ios),
+              icon: const Icon(AppIcons.arrowBack),
               onPressed: () async {
                 if (await _controller.canGoBack()) {
                   await _controller.goBack();
@@ -141,7 +158,7 @@ class _BaseShopScreenState extends State<BaseShopScreen> {
             ),
             // 前进按钮
             IconButton(
-              icon: const Icon(Icons.arrow_forward_ios),
+              icon: const Icon(AppIcons.arrowForwardIos),
               onPressed: () async {
                 if (await _controller.canGoForward()) {
                   await _controller.goForward();
@@ -150,12 +167,12 @@ class _BaseShopScreenState extends State<BaseShopScreen> {
             ),
             // 主页按钮
             IconButton(
-              icon: const Icon(Icons.home),
+              icon: const Icon(AppIcons.home),
               onPressed: () => _controller.loadRequest(Uri.parse(widget.shopUrl)),
             ),
             // 分享按钮
             IconButton(
-              icon: const Icon(Icons.share),
+              icon: const Icon(AppIcons.share),
               onPressed: () => _showShareDialog(),
             ),
           ],
@@ -167,52 +184,65 @@ class _BaseShopScreenState extends State<BaseShopScreen> {
   void _showOpenInBrowserDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('外部ブラウザで開く'),
-        content: const Text('この店舗を外部ブラウザで開きますか？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              // 使用url_launcher在外部浏览器打开
-              try {
-                final Uri url = Uri.parse(widget.shopUrl);
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
+      builder: (context) => Consumer(builder: (context, ref, __) {
+        final dt = ref.watch(dynamicTokensProvider);
+        return AlertDialog(
+          backgroundColor: dt.backgroundColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('外部ブラウザで開く', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
+          content: const Text('この店舗を外部ブラウザで開きますか？', style: TextStyle(color: DynamicTokens.textBlack87)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(foregroundColor: DynamicTokens.textBlack87),
+              child: const Text('キャンセル'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                try {
+                  final Uri url = Uri.parse(widget.shopUrl);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('エラーが発生しました'), backgroundColor: DynamicTokens.textError),
+                    );
+                  }
                 }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('エラー: $e')),
-                  );
-                }
-              }
-            },
-            child: const Text('開く'),
-          ),
-        ],
-      ),
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: dt.primaryColor,
+                foregroundColor: DynamicTokens.textWhite,
+              ),
+              child: const Text('開く'),
+            ),
+          ],
+        );
+      }),
     );
   }
 
   void _showShareDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('店舗を共有'),
+      builder: (context) => Consumer(builder: (context, ref, __) {
+        final dt = ref.watch(dynamicTokensProvider);
+        return AlertDialog(
+        backgroundColor: dt.backgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('店舗を共有', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('この店舗のURLを共有しますか？'),
+            const Text('この店舗のURLを共有しますか？', style: TextStyle(color: DynamicTokens.textBlack87)),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: DynamicTokens.textGrey500.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: SelectableText(
@@ -225,18 +255,23 @@ class _BaseShopScreenState extends State<BaseShopScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: DynamicTokens.textBlack87),
             child: const Text('キャンセル'),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              // 将URL复制到剪贴板
               _copyToClipboard(widget.shopUrl);
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: dt.primaryColor,
+              foregroundColor: DynamicTokens.textWhite,
+            ),
             child: const Text('コピー'),
           ),
         ],
-      ),
+      );
+      }),
     );
   }
 

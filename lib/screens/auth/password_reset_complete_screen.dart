@@ -3,6 +3,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:mystic_tarot_jp/services/supabase_service.dart';
+import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 
 class PasswordResetCompleteScreen extends StatefulWidget {
   const PasswordResetCompleteScreen({super.key});
@@ -85,7 +87,7 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('パスワードが正常に更新されました'), backgroundColor: Colors.green),
+        const SnackBar(content: Text('パスワードが正常に更新されました'), backgroundColor: DynamicTokens.textSuccess),
       );
       await Future.delayed(const Duration(milliseconds: 600));
       if (mounted) context.go('/auth');
@@ -122,7 +124,7 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          icon: Icon(AppIcons.arrowBack, color: theme.colorScheme.onSurface),
           onPressed: () => context.go('/auth'),
         ),
         title: Text(
@@ -144,7 +146,7 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
-                      _isValidResetLink ? Icons.lock_reset : Icons.error_outline,
+                      _isValidResetLink ? AppIcons.lockReset : AppIcons.errorOutline,
                       size: 64,
                       color: _isValidResetLink 
                           ? theme.colorScheme.primary 
@@ -156,7 +158,7 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
                           ? '新しいパスワードを設定'
                           : 'パスワードリセットエラー',
                       style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -185,10 +187,10 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
                       labelText: '新しいパスワード',
-                      prefixIcon: const Icon(Icons.lock_outline),
+                      prefixIcon: const Icon(AppIcons.lockOutline),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          _isPasswordVisible ? AppIcons.visibility : AppIcons.visibilityOff,
                         ),
                         onPressed: () {
                           setState(() {
@@ -216,10 +218,10 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
                     onSubmitted: (_) => _updatePassword(),
                     decoration: InputDecoration(
                       labelText: 'パスワード確認',
-                      prefixIcon: const Icon(Icons.lock_outline),
+                      prefixIcon: const Icon(AppIcons.lockOutline),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          _isConfirmPasswordVisible ? AppIcons.visibility : AppIcons.visibilityOff,
                         ),
                         onPressed: () {
                           setState(() {
@@ -257,7 +259,7 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(DynamicTokens.textWhite),
                               ),
                             )
                           : const Text(
@@ -287,7 +289,7 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
                     child: Row(
                       children: [
                         Icon(
-                          Icons.error_outline,
+                          AppIcons.errorOutline,
                           color: theme.colorScheme.onErrorContainer,
                           size: 24,
                         ),
@@ -317,7 +319,7 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
                   children: [
                     TextButton.icon(
                       onPressed: () => context.go('/auth'),
-                      icon: const Icon(Icons.login),
+                      icon: const Icon(AppIcons.login),
                       label: const Text('ログイン'),
                       style: TextButton.styleFrom(
                         foregroundColor: theme.colorScheme.primary,
@@ -325,7 +327,7 @@ class _PasswordResetCompleteScreenState extends State<PasswordResetCompleteScree
                     ),
                     TextButton.icon(
                       onPressed: () => context.go('/password-reset'),
-                      icon: const Icon(Icons.refresh),
+                      icon: const Icon(AppIcons.refresh),
                       label: const Text('再送信'),
                       style: TextButton.styleFrom(
                         foregroundColor: theme.colorScheme.secondary,

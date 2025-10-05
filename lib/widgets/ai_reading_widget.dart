@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:mystic_tarot_jp/core/ui/animations.dart';
 import 'package:mystic_tarot_jp/providers/ai_reading_provider.dart';
 import 'package:mystic_tarot_jp/providers/ad_reward_provider.dart';
 import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 
 /// AI解読結果表示ウィジェット
 class AIReadingWidget extends ConsumerWidget {
@@ -21,7 +23,7 @@ class AIReadingWidget extends ConsumerWidget {
     final aiReading = ref.watch(aiReadingProvider(readingType));
     final dynamicTokens = ref.watch(dynamicTokensProvider);
 
-    final content = _buildContent(context, aiReading, dynamicTokens);
+    final content = _buildContent(context, ref, aiReading, dynamicTokens);
     if (compact) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
@@ -39,16 +41,17 @@ class AIReadingWidget extends ConsumerWidget {
             Row(
               children: [
                 Icon(
-                  Icons.auto_awesome,
+                  AppIcons.autoAwesome,
                   color: dynamicTokens.primaryColor,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'AI タロット解読',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: dynamicTokens.primaryColor,
+                  style: TextStyle(
+                    fontSize: DynamicTokens.fontSizeTitleLarge,
+                    fontWeight: FontWeight.w600,
+                    color: DynamicTokens.textBlack87,
                   ),
                 ),
               ],
@@ -61,14 +64,14 @@ class AIReadingWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, AIReadingData aiReading, DynamicTokens dynamicTokens) {
+  Widget _buildContent(BuildContext context, WidgetRef ref, AIReadingData aiReading, DynamicTokens dynamicTokens) {
     switch (aiReading.state) {
       case AIReadingState.idle:
         return _buildIdleState(context, dynamicTokens);
       case AIReadingState.loading:
         return _buildLoadingState(context, dynamicTokens);
       case AIReadingState.completed:
-        return _buildCompletedState(context, aiReading.result, dynamicTokens);
+        return _buildCompletedState(context, ref, aiReading.result, dynamicTokens);
       case AIReadingState.error:
         return _buildErrorState(context, aiReading.error ?? '不明なエラー');
     }
@@ -82,15 +85,16 @@ class AIReadingWidget extends ConsumerWidget {
       child: Column(
         children: [
           Icon(
-            Icons.auto_awesome,
+            AppIcons.autoAwesome,
             size: 48,
             color: dynamicTokens.primaryColor.withOpacity(0.4),
           ),
           const SizedBox(height: 12),
           Text(
             'ここにAI診断の結果が表示されます',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: dynamicTokens.textSecondary,
+            style: TextStyle(
+              fontSize: DynamicTokens.fontSizeBodyMedium,
+              color: DynamicTokens.textBlack87,
             ),
             textAlign: TextAlign.center,
           ),
@@ -107,7 +111,7 @@ class AIReadingWidget extends ConsumerWidget {
             infinite: true,
             duration: const Duration(seconds: 1),
             child: Icon(
-              Icons.auto_awesome,
+              AppIcons.autoAwesome,
               size: 48,
               color: dynamicTokens.primaryColor.withOpacity(0.5),
             ),
@@ -116,8 +120,10 @@ class AIReadingWidget extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               'AI診断を生成中...',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              style: TextStyle(
+                fontSize: DynamicTokens.fontSizeBodyLarge,
                 fontWeight: FontWeight.w500,
+                color: DynamicTokens.textBlack87,
               ),
             ),
           ],
@@ -126,12 +132,13 @@ class AIReadingWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildCompletedState(BuildContext context, String result, DynamicTokens dynamicTokens) {
+  Widget _buildCompletedState(BuildContext context, WidgetRef ref, String result, DynamicTokens dynamicTokens) {
     final content = _buildFormattedResult(context, result, dynamicTokens);
     if (compact) {
-      return FadeInUp(child: content);
+      return wrapAiTextAnimation(child: content, ref: ref);
     }
-    return FadeInUp(
+    return wrapAiTextAnimation(
+      ref: ref,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -144,16 +151,27 @@ class AIReadingWidget extends ConsumerWidget {
     );
   }
 
+  // 仅用于解析 AI 文本中可能包含的 emoji 作为分段标题标识（不直接展示图标）
   static const _headerEmojis = [
-    '📖', '🌟', '💖', // daily
-    '🃏', '💡', '🌙', // one
-    '🅰️', '🅱️', '⚖️', '💭', // two
-    '⏳', '🕰️', '🔮', // three
+    '📖', '🌟', '💖',
+    '🃏', '💡', '🌙',
+    '🅰️', '🅱️', '⚖️', '💭',
+    '⏳', '🕰️', '🔮',
   ];
 
+  // 过滤正文中的 emoji（用户可见区域不显示 emoji）
+  static String _stripEmojis(String input) {
+    final emojiRegex = RegExp(
+      r"[\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}"
+      r"\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{FE0F}\u{200D}]",
+      unicode: true,
+    );
+    return input.replaceAll(emojiRegex, '');
+  }
+
   Widget _buildFormattedResult(BuildContext context, String text, DynamicTokens dynamicTokens) {
-    final theme = Theme.of(context).textTheme;
-    final primary = dynamicTokens.primaryColor;
+    // 使用 Design Tokens 渲染文本
+    final accent = dynamicTokens.primaryColor;
     final lines = text.split('\n');
 
     // 1) 分段：以Emoji标题作为分隔
@@ -164,10 +182,18 @@ class AIReadingWidget extends ConsumerWidget {
       if (line.isEmpty) continue;
       final isHeader = _headerEmojis.any((e) => line.startsWith(e));
       if (isHeader) {
-        current = _AISection(header: line, body: []);
+        String headerTitle = line;
+        for (final e in _headerEmojis) {
+          if (headerTitle.startsWith(e)) {
+            headerTitle = headerTitle.substring(e.length).trimLeft();
+            break;
+          }
+        }
+        current = _AISection(header: _stripEmojis(headerTitle), body: []);
         sections.add(current);
       } else {
         current ??= _AISection(header: '', body: []);
+        // 正文允许包含 emoji，不做过滤
         current.body.add(line);
       }
     }
@@ -182,52 +208,43 @@ class AIReadingWidget extends ConsumerWidget {
               padding: const EdgeInsets.only(top: 8, bottom: 4),
               child: Text(
                 s.header,
-                style: theme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
+                style: TextStyle(
+                  fontSize: DynamicTokens.fontSizeTitleMedium,
+                  fontWeight: FontWeight.w600,
                   height: 1.4,
-                  color: primary,
+                  color: DynamicTokens.textBlack87,
                 ),
               ),
             ),
           if (s.body.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.only(left: 10),
-              decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(color: primary.withOpacity(0.3), width: 3),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (int i = 0; i < s.body.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: _buildBodyLine(theme, s.body[i], isLead: i == 0),
-                    ),
-                ],
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int i = 0; i < s.body.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: _buildBodyLine(context, dynamicTokens, s.body[i], isLead: i == 0),
+                  ),
+                const SizedBox(height: 8),
+              ],
             ),
         ]
       ],
     );
   }
 
-  Widget _buildBodyLine(TextTheme theme, String line, {bool isLead = false}) {
+  Widget _buildBodyLine(BuildContext context, DynamicTokens dynamicTokens, String line, {bool isLead = false}) {
     // 列表行：以「・」「-」「—」开头
-    final trimmed = line.trimLeft();
-    final isBullet = trimmed.startsWith('・') || trimmed.startsWith('-') || trimmed.startsWith('—');
-    final content = isBullet ? trimmed.substring(1).trimLeft() : line;
-    final style = (isLead
-            ? theme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)
-            : theme.bodyMedium)
-        ?.copyWith(height: 1.6, fontSize: 15);
+    final String trimmed = line.trimLeft();
+    final bool isBullet = trimmed.startsWith('・') || trimmed.startsWith('-') || trimmed.startsWith('—');
+    final String content = isBullet ? trimmed.substring(1).trimLeft() : line;
+    // 统一为全局正文样式（bodyMedium: 14/w400）
+    final TextStyle style = Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.6) ?? const TextStyle(fontSize: 14, height: 1.6);
     if (!isBullet) return Text(content, style: style);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('•  ', style: TextStyle(fontSize: 16, height: 1.6)),
+        Text('•  ', style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.6) ?? const TextStyle(fontSize: 14, height: 1.6)),
         Expanded(child: Text(content, style: style)),
       ],
     );
@@ -242,13 +259,14 @@ class AIReadingWidget extends ConsumerWidget {
           Icon(
             Icons.error_outline,
             size: 48,
-            color: Colors.red[400],
+            color: DynamicTokens.textError,
           ),
           const SizedBox(height: 12),
           Text(
             'AI解読の取得に失敗しました',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.red[700],
+            style: TextStyle(
+              fontSize: DynamicTokens.fontSizeTitleMedium,
+              color: DynamicTokens.textError,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -256,14 +274,15 @@ class AIReadingWidget extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.red[50],
+              color: DynamicTokens.textError.withOpacity(0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.red[200]!),
+              border: Border.all(color: DynamicTokens.textError.withOpacity(0.3)),
             ),
             child: Text(
               error,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.red[700],
+              style: TextStyle(
+                fontSize: DynamicTokens.fontSizeBodySmall,
+                color: DynamicTokens.textError,
               ),
             ),
           ),
@@ -315,12 +334,12 @@ class AIReadingButton extends ConsumerWidget {
                 height: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : const Icon(Icons.auto_awesome),
+            : const Icon(AppIcons.autoAwesome),
         label: Text(isLoading ? '解読生成中...' : text),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           backgroundColor: dynamicTokens.primaryColor,
-          foregroundColor: Colors.white,
+          foregroundColor: DynamicTokens.textWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -350,7 +369,7 @@ class AIReadingButton extends ConsumerWidget {
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             backgroundColor: dynamicTokens.primaryColor,
-            foregroundColor: Colors.white,
+            foregroundColor: DynamicTokens.textWhite,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -385,8 +404,8 @@ class AIReadingButton extends ConsumerWidget {
         label: const Text('読み込み中...'),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Colors.grey,
-          foregroundColor: Colors.white,
+          backgroundColor: DynamicTokens.textGrey600,
+          foregroundColor: DynamicTokens.textWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -400,12 +419,12 @@ class AIReadingButton extends ConsumerWidget {
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: null,
-        icon: const Icon(Icons.error_outline),
+        icon: const Icon(AppIcons.errorOutline),
         label: const Text('エラーが発生しました'),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Colors.red,
-          foregroundColor: Colors.white,
+          backgroundColor: DynamicTokens.textError,
+          foregroundColor: DynamicTokens.textWhite,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -434,18 +453,18 @@ class AIReadingButton extends ConsumerWidget {
       icon = const SizedBox(
         width: 20,
         height: 20,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+        child: CircularProgressIndicator(strokeWidth: 2, color: DynamicTokens.textWhite),
       );
       label = adReward.state == AdRewardState.watching ? '広告視聴中...' : '準備中...';
       backgroundColor = dynamicTokens.primaryColor;
       onPressedCallback = null;
     } else if (isLimitReached) {
-      icon = const Icon(Icons.block);
+      icon = const Icon(AppIcons.block);
       label = '本日の上限に達しました (3回)';
-      backgroundColor = Colors.grey;
+      backgroundColor = DynamicTokens.textGrey600;
       onPressedCallback = null;
     } else {
-      icon = const Icon(Icons.play_circle_outline);
+      icon = const Icon(AppIcons.playCircleOutline);
       label = '広告を見て$text ($remainingCount回残り)';
       backgroundColor = dynamicTokens.primaryColor;
       onPressedCallback = enabled ? () => _handleAdWatch(context, ref) : null;
@@ -462,7 +481,7 @@ class AIReadingButton extends ConsumerWidget {
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               backgroundColor: backgroundColor,
-              foregroundColor: Colors.white,
+              foregroundColor: DynamicTokens.textWhite,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -475,19 +494,19 @@ class AIReadingButton extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red[50],
+                color: DynamicTokens.textError.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red[200]!),
+                border: Border.all(color: DynamicTokens.textError.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber, color: Colors.red[600], size: 20),
+                  Icon(AppIcons.warningAmber, color: DynamicTokens.textError, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       adReward.error!,
                       style: TextStyle(
-                        color: Colors.red[700],
+                        color: DynamicTokens.textError,
                         fontSize: 14,
                       ),
                     ),
@@ -501,8 +520,9 @@ class AIReadingButton extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             '毎日最大3回まで広告視聴でAI解読が利用できます',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: dynamicTokens.textSecondary,
+            style: TextStyle(
+              fontSize: DynamicTokens.fontSizeCaption,
+              color: DynamicTokens.textBlack87,
             ),
             textAlign: TextAlign.center,
           ),
@@ -566,7 +586,7 @@ class AIReadingButton extends ConsumerWidget {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),
+        icon: const Icon(AppIcons.checkCircle, color: DynamicTokens.textSuccess, size: 48),
         title: const Text('広告視聴完了！'),
         content: const Text('AI解読を開始します。'),
         actions: [
@@ -583,7 +603,7 @@ class AIReadingButton extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        icon: const Icon(Icons.error_outline, color: Colors.red, size: 48),
+        icon: const Icon(AppIcons.errorOutline, color: DynamicTokens.textError, size: 48),
         title: const Text('広告視聴に失敗'),
         content: const Text('広告を最後まで視聴していただく必要があります。もう一度お試しください。'),
         actions: [

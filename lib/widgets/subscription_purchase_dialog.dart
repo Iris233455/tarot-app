@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:mystic_tarot_jp/providers/subscription_provider.dart';
 import 'package:mystic_tarot_jp/services/subscription_service.dart';
 
@@ -28,23 +29,23 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
           return hasActiveSubscription.when(
             data: (isActive) => Row(
               children: [
-                Icon(Icons.workspace_premium, color: Colors.amber, size: 28),
+                Icon(AppIcons.workspacePremium, color: dynamicTokens.primaryColor, size: 28),
                 const SizedBox(width: 8),
-                Text(isActive ? 'プレミアム期間延長' : 'プレミアムプラン'),
+                const Text('プレミアムプラン', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
               ],
             ),
             loading: () => Row(
               children: [
-                Icon(Icons.workspace_premium, color: Colors.amber, size: 28),
+                Icon(AppIcons.workspacePremium, color: dynamicTokens.primaryColor, size: 28),
                 const SizedBox(width: 8),
-                const Text('プレミアムプラン'),
+                const Text('プレミアムプラン', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
               ],
             ),
             error: (error, stack) => Row(
               children: [
-                Icon(Icons.workspace_premium, color: Colors.amber, size: 28),
+                Icon(AppIcons.workspacePremium, color: dynamicTokens.primaryColor, size: 28),
                 const SizedBox(width: 8),
-                const Text('プレミアムプラン'),
+                const Text('プレミアムプラン', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
               ],
             ),
           );
@@ -58,13 +59,9 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.amber.shade50, Colors.orange.shade50],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: dynamicTokens.primaryColor.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.amber.shade200),
+                border: Border.all(color: dynamicTokens.primaryColor.withOpacity(0.35)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,16 +69,16 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
                   Text(
                     'プレミアム特典',
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: Colors.amber.shade800,
+                      color: DynamicTokens.textBlack87,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _buildBenefitItem('広告なしでスムーズな体験', Icons.block),
-                  _buildBenefitItem('無制限のタロット解読', Icons.all_inclusive),
-                  _buildBenefitItem('プレミアムカードデザイン', Icons.style),
-                  _buildBenefitItem('優先サポート', Icons.support_agent),
+                  _buildBenefitItem('広告なしでスムーズな体験', AppIcons.block),
+                  _buildBenefitItem('無制限のタロット解読', AppIcons.autoAwesome),
+                  _buildBenefitItem('プレミアムカードデザイン', AppIcons.style),
+                  _buildBenefitItem('優先サポート', AppIcons.infoOutline),
                 ],
               ),
             ),
@@ -91,9 +88,9 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
             Text(
               'プランを選択',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: Colors.grey.shade700,
+                color: DynamicTokens.textBlack87,
               ),
             ),
             const SizedBox(height: 12),
@@ -107,7 +104,7 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
                     if (products.isEmpty) {
                       return const Text('利用可能なプランがありません');
                     }
-
+                    // 初次打开时默认选中第一个产品
                     selectedProductId ??= products.first.id;
 
                     return Column(
@@ -125,16 +122,16 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: isSelected ? Colors.amber : Colors.grey.shade300,
+                                color: isSelected ? dynamicTokens.primaryColor : Colors.grey.shade300,
                                 width: isSelected ? 2 : 1,
                               ),
-                              color: isSelected ? Colors.amber.shade50 : Colors.grey.shade50,
+                              color: isSelected ? dynamicTokens.primaryColor.withOpacity(0.06) : Colors.grey.shade50,
                             ),
                             child: Row(
                               children: [
                                 Icon(
-                                  isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                                  color: isSelected ? Colors.amber : Colors.grey,
+                                  isSelected ? AppIcons.checkCircle : AppIcons.radio_button_off,
+                                  color: isSelected ? dynamicTokens.primaryColor : Colors.grey,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -144,16 +141,16 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
                                       Text(
                                         product.title,
                                         style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: isSelected ? Colors.amber.shade800 : Colors.black87,
+                                          fontWeight: FontWeight.w600,
+                                          color: DynamicTokens.textBlack87,
                                         ),
                                       ),
                                       Text(
                                         product.price,
                                         style: TextStyle(
                                           fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: isSelected ? Colors.amber.shade800 : Colors.black87,
+                                          fontWeight: FontWeight.w600,
+                                          color: DynamicTokens.textBlack87,
                                         ),
                                       ),
                                     ],
@@ -175,7 +172,7 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
             const SizedBox(height: 16),
             const Text(
               '現在はテスト環境のため、実際の課金は発生しません。',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: DynamicTokens.textGrey600),
             ),
           ],
         ),
@@ -183,15 +180,24 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('キャンセル'),
+          child: const Text('キャンセル', style: TextStyle(color: DynamicTokens.textGrey600)),
         ),
-        ElevatedButton(
-          onPressed: selectedProductId != null ? () async {
-            Navigator.of(context).pop();
-            await _purchaseProduct(selectedProductId!);
-          } : null,
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
-          child: const Text('今すぐ購読'),
+        Consumer(
+          builder: (context, ref, child) {
+            final productsAsync = ref.watch(availableProductsProvider);
+            final String? effectiveSelectedId = productsAsync.maybeWhen(
+              data: (products) => selectedProductId ?? (products.isNotEmpty ? products.first.id : null),
+              orElse: () => selectedProductId,
+            );
+            return ElevatedButton(
+              onPressed: effectiveSelectedId != null ? () async {
+                Navigator.of(context).pop();
+                await _purchaseProduct(effectiveSelectedId!);
+              } : null,
+              style: ElevatedButton.styleFrom(backgroundColor: dynamicTokens.primaryColor, foregroundColor: DynamicTokens.textWhite),
+              child: const Text('今すぐ購読'),
+            );
+          },
         ),
       ],
     );
@@ -202,9 +208,9 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: Colors.amber.shade700),
+          Icon(icon, size: 16, color: widget.ref.watch(dynamicTokensProvider).primaryColor),
           const SizedBox(width: 8),
-          Text(text, style: TextStyle(fontSize: 14, color: Colors.amber.shade700)),
+          Text(text, style: const TextStyle(fontSize: 14, color: DynamicTokens.textBlack87)),
         ],
       ),
     );
@@ -220,7 +226,17 @@ class _SubscriptionPurchaseDialogState extends State<SubscriptionPurchaseDialog>
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('🎉 購読が完了しました！'), backgroundColor: Colors.green),
+            SnackBar(
+              backgroundColor: DynamicTokens.textSuccess,
+              content: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(AppIcons.checkCircle, color: DynamicTokens.textWhite),
+                  SizedBox(width: 8),
+                  Text('購読が完了しました！', style: TextStyle(color: DynamicTokens.textWhite)),
+                ],
+              ),
+            ),
           );
         }
 

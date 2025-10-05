@@ -13,6 +13,7 @@ abstract class AppStringsBase {
   String get homeDailyCard;
   String get homeTarotCalendar;
   String get homeTodayMessage;
+  String get homeLongPressToDraw;
   
   // ==================== 占卜流程 ====================
   String get readingSelectSpread;
@@ -20,6 +21,7 @@ abstract class AppStringsBase {
   String get readingExplanation;
   String get readingQuestion;
   String get readingInterpretation;
+  String get labelQuestionPoints;
 
   // ==================== 页面标题/标签 ====================
   String get historyTitle; // 履歴 / History
@@ -55,12 +57,14 @@ abstract class AppStringsBase {
   String get buttonComplete;
   String get buttonCancel;
   String get buttonConfirm;
+  String get buttonNext;
   String get buttonRedeemNow;
   String get buttonCheckCode;
   String get buttonReset;
   String get buttonRetry;
   String get buttonDelete;
   String get buttonDrawAgain; // もう一度占う
+  String get buttonDrawTodayCard; // 本日のカードを引く
   
   // ==================== 状态消息 ====================
   String get messageAlreadyDrawnToday;
@@ -399,6 +403,20 @@ abstract class AppStringsBase {
   String get labelPastPresentFuture;
   String get labelEmotionConsciousness;
   String get labelCauseSolution;
+  
+  // ==================== 抽牌/洗切牌 页面（Shuffle/Draw） ====================
+  String get readingPreparing; // 准备卡牌
+  String get readingShuffling; // 洗牌中
+  String get readingCutting;   // 切牌中
+  String get readingDrawing;   // 请抽牌
+  String get readingResultTitle; // 占卜结果
+  String get readingComplete;  // 占卜完成
+  
+  String get hintSwipeUpToPick; // 上滑取顶牌
+  String get hintDragToSlot;    // 向上拖拽放入槽位
+  String get errorDrawFailed;   // 抽牌失败
+  
+  String get buttonSeeResult;   // 查看结果
   String get readingTitle;
   String get labelSelectCardCount;
   String get buttonShuffle;

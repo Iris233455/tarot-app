@@ -126,37 +126,40 @@ final readingResultProvider = StateProvider<ReadingResult?>((ref) => null);
 final performReadingProvider = FutureProvider.family<ReadingResult, Map<String, dynamic>>((ref, params) async {
   final readingType = params['type'] as String;
   final question = params['question'] as String;
-  
-  // 根据占い类型确定抽牌数量
-  int cardCount = 1;
-  switch (readingType) {
-    case 'one':
-    case 'ワンオラクル':
-      cardCount = 1;
-      break;
-    case 'yesno':
-    case 'ツーカード':
-      cardCount = 2;
-      break;
-    case 'three':
-    case 'スリーカード':
-      cardCount = 3;
-      break;
-    default:
-      cardCount = 1;
+  final uiPickedCards = params['cards'] as List<TarotCard>?;
+  final uiOrientations = params['orientations'] as List<bool>?;
+
+  // 优先使用 UI 已选的牌与方向；否则回退到随机抽取
+  List<TarotCard> cards;
+  List<bool> orientations;
+  if (uiPickedCards != null && uiPickedCards.isNotEmpty) {
+    cards = uiPickedCards;
+    orientations = (uiOrientations != null && uiOrientations.length == uiPickedCards.length)
+        ? uiOrientations
+        : List<bool>.generate(uiPickedCards.length, (i) => (DateTime.now().millisecondsSinceEpoch + i) % 2 == 0);
+  } else {
+    // 根据占い类型确定抽牌数量
+    int cardCount = 1;
+    switch (readingType) {
+      case 'one':
+      case 'ワンオラクル':
+        cardCount = 1;
+        break;
+      case 'yesno':
+      case 'ツーカード':
+        cardCount = 2;
+        break;
+      case 'three':
+      case 'スリーカード':
+        cardCount = 3;
+        break;
+      default:
+        cardCount = 1;
+    }
+    cards = await DataService.getRandomCards(cardCount);
+    orientations = List<bool>.generate(cardCount, (i) => (DateTime.now().millisecondsSinceEpoch + i) % 2 == 0);
   }
-  
-  // 抽取卡牌
-  final cards = await DataService.getRandomCards(cardCount);
-  
-  // 为每张牌随机分配方向
-  final orientations = <bool>[];
-  final random = DateTime.now().millisecondsSinceEpoch;
-  for (int i = 0; i < cards.length; i++) {
-    final seed = random + i * 1000;
-    orientations.add((seed ~/ 1000) % 2 == 0);
-  }
-  
+
   final result = ReadingResult(
     cards: cards,
     orientations: orientations,
@@ -164,30 +167,6 @@ final performReadingProvider = FutureProvider.family<ReadingResult, Map<String, 
     question: question,
     timestamp: DateTime.now(),
   );
-  
-  // 保存结果到状态
-  ref.read(readingResultProvider.notifier).state = result;
-  
-  // 在生成新的占卜结果时，重置对应类型的 AI 解读状态，确保下一页会重新请求
-  String _toKey(String t) {
-    switch (t) {
-      case 'ワンオラクル':
-      case 'one':
-        return 'one';
-      case 'ツーカード':
-      case 'yesno':
-        return 'two';
-      case 'スリーカード':
-      case 'three':
-        return 'three';
-      default:
-        return 'one';
-    }
-  }
-  final key = _toKey(readingType);
-  // 将状态置为 idle（通过调用 reset），这样 ResultPage 中的 idle 检查会触发新请求
-  ref.read(aiReadingProvider(key).notifier).reset();
-  
   return result;
 });
 

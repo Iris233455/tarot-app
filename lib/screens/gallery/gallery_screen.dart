@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:mystic_tarot_jp/themes/tokens.dart';
 import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:mystic_tarot_jp/providers/tarot_providers.dart';
 import 'package:mystic_tarot_jp/models/tarot_card.dart';
 import 'package:mystic_tarot_jp/services/data_service.dart';
 import 'package:mystic_tarot_jp/widgets/themed_background.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mystic_tarot_jp/core/ui/app_logo.dart';
+import 'package:mystic_tarot_jp/widgets/app_tag.dart';
 
 class GalleryScreen extends ConsumerStatefulWidget {
   const GalleryScreen({super.key});
@@ -58,6 +61,29 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        elevation: 2,
+        scrolledUnderElevation: 2,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.black.withOpacity(0.08),
+        centerTitle: true,
+        backgroundColor: dynamicTokens.backgroundColor,
+        title: InkWell(
+          onTap: () => context.go('/'),
+          customBorder: const CircleBorder(),
+          child: const AppLogo(size: 36),
+        ),
+        automaticallyImplyLeading: false,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
+              ? dynamicTokens.primaryColor.withOpacity(0.6)
+              : dynamicTokens.primaryColor.withOpacity(0.2),
+          ),
+        ),
+      ),
       body: ThemedBackground(
         child: SafeArea(
           child: Column(
@@ -71,9 +97,9 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'カードを検索...',
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: const Icon(AppIcons.search),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(AppIcons.clear),
                         onPressed: () {
                           _searchController.clear();
                         },
@@ -93,8 +119,8 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 2,
-        selectedItemColor: dynamicTokens.primaryColor,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: dynamicTokens.textPrimary,
+        unselectedItemColor: dynamicTokens.textSecondary,
         onTap: (index) {
           switch (index) {
             case 0:
@@ -113,19 +139,19 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(AppIcons.home),
             label: '毎日の占い',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome),
+            icon: Icon(AppIcons.autoAwesome),
             label: 'スプレット',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.library_books),
+            icon: Icon(AppIcons.libraryBooks),
             label: 'ギャラリー',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.style),
+            icon: Icon(AppIcons.style),
             label: 'マイページ',
           ),
         ],
@@ -160,7 +186,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error, size: 48, color: Colors.red),
+            const Icon(AppIcons.error, size: 48, color: DynamicTokens.textError),
             const SizedBox(height: 16),
             Text('エラー: $error'),
             const SizedBox(height: 16),
@@ -184,7 +210,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error, size: 48, color: Colors.red),
+            const Icon(AppIcons.error, size: 48, color: DynamicTokens.textError),
             const SizedBox(height: 16),
             Text('エラー: $error'),
             const SizedBox(height: 16),
@@ -219,9 +245,9 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? [
-                  // 有背景图的主题：使用高透明度白色背景
-                  Colors.white.withOpacity(0.95),
-                  Colors.white.withOpacity(0.90),
+                  // 有背景图：使用 DesignTokens.surfaceColor 的高透明度背景
+                  DesignTokens.surfaceColor.withOpacity(0.95),
+                  DesignTokens.surfaceColor.withOpacity(0.90),
                 ] : [
                   // 纯色背景主题：保持原来的surface颜色
                   ref.watch(dynamicTokensProvider).surfaceColor.withOpacity(0.8),
@@ -235,13 +261,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   : ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.2),
                 width: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? 2 : 1,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+              // no box shadows
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -253,8 +273,8 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                        card.imageUrl,
                        fit: BoxFit.cover,
                        errorBuilder: (c, e, s) => Container(
-                         color: Colors.grey[200],
-                         child: const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                         color: ref.watch(dynamicTokensProvider).surfaceColor.withOpacity(0.9),
+                         child: const Icon(AppIcons.brokenImage, size: 48, color: DynamicTokens.textGrey600),
                        ),
                      ),
                   ),
@@ -267,8 +287,8 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                       Text(
                         card.nameJa ?? '',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? Colors.black87 : null,
+                          fontWeight: FontWeight.w600,
+                          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? DynamicTokens.textBlack87 : null,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -276,7 +296,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                       Text(
                         card.nameEn ?? '',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? Colors.grey.shade600 : Colors.grey[600],
+                          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? DynamicTokens.textGrey600 : DynamicTokens.textGrey600,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -303,7 +323,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           child: _buildExpansionPanel(
             title: '大アルカナ',
             subtitle: 'Major Arcana',
-            icon: Icons.star,
+            icon: AppIcons.star,
             cards: grouped['大アルカナ'] ?? [],
           ),
         ),
@@ -313,45 +333,17 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           child: _buildExpansionPanel(
             title: '小アルカナ',
             subtitle: 'Minor Arcana',
-            icon: Icons.style,
+            icon: AppIcons.style,
             cards: [], // 空列表，因为我们使用extraChildren
             extraChildren: [
-              _buildSuitExpansion('ワンド', 'Wands', Icons.local_fire_department, grouped['ワンド'] ?? [], 'wands'),
-              _buildSuitExpansion('カップ', 'Cups', Icons.water_drop, grouped['カップ'] ?? [], 'cups'),
-              _buildSuitExpansion('ソード', 'Swords', Icons.flash_on, grouped['ソード'] ?? [], 'swords'),
-              _buildSuitExpansion('ペンタクル', 'Pentacles', Icons.circle, grouped['ペンタクル'] ?? [], 'pentacles'),
+              _buildSuitExpansion('ワンド', 'Wands', AppIcons.localFireDepartment, grouped['ワンド'] ?? [], 'wands'),
+              _buildSuitExpansion('カップ', 'Cups', AppIcons.waterDrop, grouped['カップ'] ?? [], 'cups'),
+              _buildSuitExpansion('ソード', 'Swords', AppIcons.flashOn, grouped['ソード'] ?? [], 'swords'),
+              _buildSuitExpansion('ペンタクル', 'Pentacles', AppIcons.circle, grouped['ペンタクル'] ?? [], 'pentacles'),
             ],
           ),
         ),
-        FadeInUp(
-          duration: DynamicTokens.animationDuration,
-          delay: const Duration(milliseconds: 100),
-          child: _buildExpansionPanel(
-            title: 'タロットカード士',
-            subtitle: 'Experts',
-            icon: Icons.person,
-            cards: grouped['タロットカード士'] ?? [],
-            extraChildren: [
-              _buildInfoTile('アーサー・エドワード・ウェイト', 'A.E. Waite'),
-              _buildInfoTile('パメラ・コールマン・スミス', 'Pamela Colman Smith'),
-              _buildInfoTile('アレイスター・クロウリー', 'Aleister Crowley'),
-            ],
-          ),
-        ),
-        FadeInUp(
-          duration: DynamicTokens.animationDuration,
-          delay: const Duration(milliseconds: 150),
-          child: _buildExpansionPanel(
-            title: 'タロット作品',
-            subtitle: 'Books',
-            icon: Icons.book,
-            cards: grouped['タロット作品'] ?? [],
-            extraChildren: [
-              _buildInfoTile('タロット図解', 'Pictorial Key to the Tarot'),
-              _buildInfoTile('タロットの書', 'Book of Thoth'),
-            ],
-          ),
-        ),
+        // 隐藏：タロットカード士 / タロット作品 模块
       ],
     );
   }
@@ -372,9 +364,9 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? [
-            // 有背景图的主题：使用高透明度白色背景
-            Colors.white.withOpacity(0.95),
-            Colors.white.withOpacity(0.90),
+            // 有背景图的主题：使用高透明度 surface 背景
+            DesignTokens.surfaceColor.withOpacity(0.95),
+            DesignTokens.surfaceColor.withOpacity(0.90),
           ] : [
             // 纯色背景主题：保持原来的surface颜色
             dynamicTokens.surfaceColor.withOpacity(0.8),
@@ -388,13 +380,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
             : dynamicTokens.primaryColor.withOpacity(0.2),
           width: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? 2 : 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        // no box shadows
       ),
       child: Theme(
         data: Theme.of(context).copyWith(
@@ -411,14 +397,14 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           title: Text(
             title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null,
+              fontWeight: FontWeight.w600,
+              color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? DynamicTokens.textBlack87 : DynamicTokens.textBlack87,
             ),
           ),
           subtitle: Text(
             subtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : ref.watch(dynamicTokensProvider).textSecondary,
+              color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? DynamicTokens.textGrey600 : ref.watch(dynamicTokensProvider).textSecondary,
             ),
           ),
           children: [
@@ -442,23 +428,23 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           width: 44,
           fit: BoxFit.contain,
           errorBuilder: (c, e, s) => Container(
-            color: Colors.grey[200],
+            color: ref.watch(dynamicTokensProvider).surfaceColor.withOpacity(0.9),
             width: 44,
             height: 64,
-            child: const Icon(Icons.broken_image, size: 32, color: Colors.grey),
+            child: const Icon(AppIcons.brokenImage, size: 32, color: DynamicTokens.textGrey600),
           ),
         ),
       ),
       title: Text(
         card.nameJa ?? '', 
         style: TextStyle(
-          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? Colors.black87 : null,
+          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? DynamicTokens.textBlack87 : null,
         ),
       ),
       subtitle: Text(
         card.nameEn ?? '',
         style: TextStyle(
-          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? Colors.grey.shade600 : null,
+          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? DynamicTokens.textGrey600 : null,
         ),
       ),
       onTap: () => _showCardDetail(context, card),
@@ -467,17 +453,17 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
 
   Widget _buildInfoTile(String title, String subtitle) {
     return ListTile(
-      leading: const Icon(Icons.info_outline, color: Colors.grey),
+      leading: const Icon(AppIcons.infoOutline, color: Colors.grey),
       title: Text(
         title,
         style: TextStyle(
-          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? Colors.black87 : null,
+          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? DynamicTokens.textBlack87 : null,
         ),
       ),
       subtitle: Text(
         subtitle,
         style: TextStyle(
-          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? Colors.grey.shade600 : null,
+          color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null) ? DynamicTokens.textGrey600 : null,
         ),
       ),
     );
@@ -501,13 +487,13 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
         title: Text(
           title, 
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null,
+            color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? DynamicTokens.textBlack87 : DynamicTokens.textBlack87,
           ),
         ),
         subtitle: Text(
           subtitle, 
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: dynamicTokens.isDark ? Colors.grey.shade600 : null,
+            color: dynamicTokens.isDark ? DynamicTokens.textGrey600 : null,
           ),
         ),
         children: [
@@ -530,8 +516,8 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
-              ? [Colors.white.withOpacity(0.95), Colors.white.withOpacity(0.9)]
-              : [Colors.white, Colors.white],
+              ? [DesignTokens.surfaceColor.withOpacity(0.95), DesignTokens.surfaceColor.withOpacity(0.9)]
+              : [DesignTokens.surfaceColor, DesignTokens.surfaceColor],
         ),
         borderRadius: BorderRadius.circular(8),
         // 统一去除默认灰色线框，使用主题色边框
@@ -541,13 +527,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               : Colors.transparent,
           width: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? 1 : 0,
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          )
-        ],
+        // no box shadows
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -555,32 +535,46 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           Row(
             children: [
               Icon(
-                Icons.info_outline,
-                color: Theme.of(context).primaryColor,
+                AppIcons.infoOutline,
+                color: dynamicTokens.primaryColor,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 '${suitInfo.nameJp}の意味',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.w600,
+                  color: DynamicTokens.textBlack87,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              suitInfo.symbolism,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
+          const SizedBox(height: 8),
+          // 主题色标签（单行，不换行，超出可横向滑动）
+          SizedBox(
+            height: 30,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: (
+                  suitInfo.symbolism
+                      .split(RegExp(r'[、,\s]+'))
+                      .where((e) => e.isNotEmpty)
+                      .take(6)
+                      .toList()
+                ).map((t) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: AppTag(
+                        t,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        borderRadius: 16,
+                        fontSize: 12,
+                        useTheme: true,
+                        overlay: true,
+                      ),
+                    ))
+                    .toList(),
               ),
             ),
           ),
@@ -639,7 +633,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                     card.imageUrl,
                     height: 200,
                     fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) => const Icon(Icons.broken_image, size: 48),
+                    errorBuilder: (c, e, s) => const Icon(AppIcons.brokenImage, size: 48),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -648,17 +642,17 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                 Text(
                   card.nameJa ?? '',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: dynamicTokens.primaryColor,
+                    fontWeight: FontWeight.w600,
+                    color: DynamicTokens.textBlack87,
                   ),
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                 ),
                 Text(
                   card.nameEn ?? '',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: ref.watch(dynamicTokensProvider).textSecondary,
                   ),
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                 ),
                 const SizedBox(height: 16),
 
@@ -667,9 +661,9 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                    border: Border.all(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.22)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -677,10 +671,10 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                       Text(
                         '物語り',
                         textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontWeight: FontWeight.normal,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
                           fontSize: 14,
-                          color: Colors.blue.withOpacity(0.7),
+                          color: DynamicTokens.textBlack87,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -702,22 +696,14 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.withOpacity(0.3)),
+                    border: Border.all(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.22)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '正位置',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 14,
-                          color: Colors.green.withOpacity(0.7),
-                        ),
-                      ),
+                      const AppTag('正位置', padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4), borderRadius: 16, fontSize: 12, useTheme: true, overlay: true),
                       const SizedBox(height: 8),
                       Builder(
                         builder: (context) {
@@ -730,11 +716,12 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                   width: double.infinity,
                                   child: Text(
                                     parsed['title']!,
-                                    textAlign: TextAlign.center,
+                                    textAlign: TextAlign.left,
                                     style: const TextStyle(
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w600,
                                       height: 1.4,
+                                      color: DynamicTokens.textBlack87,
                                     ),
                                   ),
                                 ),
@@ -744,18 +731,13 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                     parsed['content']!,
                                     style: const TextStyle(
                                       fontSize: 14,
-                                      height: 1.4,
+                                      height: 1.6,
+                                      color: DynamicTokens.textBlack87,
                                     ),
                                   ),
                                 ],
                               ] else ...[
-                                Text(
-                                  card.meaningUpright,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    height: 1.4,
-                                  ),
-                                ),
+                                const SizedBox.shrink(),
                               ],
                             ],
                           );
@@ -771,7 +753,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                               'キーワードデータなし',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey,
+                                color: DynamicTokens.textGrey500,
                                 fontStyle: FontStyle.italic,
                               ),
                             );
@@ -781,26 +763,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                             runSpacing: 4,
                             children: keywords
                                 .take(8)
-                                .map((keyword) => Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: Colors.green.withOpacity(0.4),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        keyword,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.green.shade700,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ))
+                                .map((k) => const SizedBox.shrink())
                                 .toList(),
                           );
                         },
@@ -816,22 +779,14 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                    border: Border.all(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.22)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '逆位置',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 14,
-                          color: Colors.red.withOpacity(0.7),
-                        ),
-                      ),
+                      const AppTag('逆位置', padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4), borderRadius: 16, fontSize: 12, useTheme: true, overlay: true),
                       const SizedBox(height: 8),
                       Builder(
                         builder: (context) {
@@ -844,11 +799,12 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                   width: double.infinity,
                                   child: Text(
                                     parsed['title']!,
-                                    textAlign: TextAlign.center,
+                                    textAlign: TextAlign.left,
                                     style: const TextStyle(
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight: FontWeight.w600,
                                       height: 1.4,
+                                      color: DynamicTokens.textBlack87,
                                     ),
                                   ),
                                 ),
@@ -858,18 +814,13 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                                     parsed['content']!,
                                     style: const TextStyle(
                                       fontSize: 14,
-                                      height: 1.4,
+                                      height: 1.6,
+                                      color: DynamicTokens.textBlack87,
                                     ),
                                   ),
                                 ],
                               ] else ...[
-                                Text(
-                                  card.meaningReversed,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    height: 1.4,
-                                  ),
-                                ),
+                                const SizedBox.shrink(),
                               ],
                             ],
                           );
@@ -885,7 +836,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                               'キーワードデータなし',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey,
+                                color: DynamicTokens.textGrey500,
                                 fontStyle: FontStyle.italic,
                               ),
                             );
@@ -895,25 +846,13 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                             runSpacing: 4,
                             children: keywords
                                 .take(8)
-                                .map((keyword) => Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: Colors.red.withOpacity(0.4),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        keyword,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.red.shade700,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
+                                .map((k) => AppTag(
+                                      k,
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      borderRadius: 20,
+                                      fontSize: 12,
+                                      useTheme: true,
+                                      overlay: true,
                                     ))
                                 .toList(),
                           );
@@ -925,16 +864,23 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               ],
             ),
           ),
-          // 关闭按钮 - 右上角X按钮
+          // 关闭按钮 - 右上角X按钮（统一 24x24, icon 16, 间距 8）
           Positioned(
             top: 8,
             right: 8,
-            child: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.close),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withOpacity(0.1),
-                foregroundColor: Colors.grey[600],
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(AppIcons.close, size: 16),
+                style: IconButton.styleFrom(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  minimumSize: const Size(24, 24),
+                  backgroundColor: DynamicTokens.textBlack87.withOpacity(0.1),
+                  foregroundColor: DynamicTokens.textGrey600,
+                ),
               ),
             ),
           ),

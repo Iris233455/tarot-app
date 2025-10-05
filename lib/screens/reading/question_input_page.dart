@@ -87,18 +87,25 @@ class _QuestionInputPageState extends ConsumerState<QuestionInputPage> {
   @override
   Widget build(BuildContext context) {
     final dynamicTokens = ref.watch(dynamicTokensProvider);
-    final readingType = ref.watch(readingTypeProvider);
-    final isTwoCards = readingType.contains('ツーカード') || readingType.contains('two') || readingType.contains('spreads_2');
+    final readingFormat = ref.watch(readingFormatProvider);
+    final isTwoCards = readingFormat.contains('ツーカード') || readingFormat.contains('two') || readingFormat.contains('spreads_2');
     
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(
-          left: DynamicTokens.spacingMd,
-          right: DynamicTokens.spacingMd,
-          top: DynamicTokens.spacingMd, // 添加顶部间距
-        ),
+      child: SafeArea(
+        bottom: true,
         child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                padding: const EdgeInsets.only(
+                  left: DynamicTokens.spacingMd,
+                  right: DynamicTokens.spacingMd,
+                  top: DynamicTokens.spacingMd,
+                  bottom: DynamicTokens.spacingMd,
+                ),
+                child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
           
@@ -108,8 +115,10 @@ class _QuestionInputPageState extends ConsumerState<QuestionInputPage> {
             delay: const Duration(milliseconds: 100),
             child: Text(
               'よくある質問',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: TextStyle(
+                fontSize: DynamicTokens.fontSizeTitleLarge,
+                fontWeight: FontWeight.w600,
+                color: ref.watch(dynamicTokensProvider).textPrimary,
               ),
             ),
           ),
@@ -151,9 +160,10 @@ class _QuestionInputPageState extends ConsumerState<QuestionInputPage> {
                             ),
                             child: Text(
                               question,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: TextStyle(
+                                fontSize: DynamicTokens.fontSizeBodyMedium,
                                 color: isSelected 
-                                    ? Colors.white
+                                    ? DynamicTokens.textWhite
                                     : ref.watch(dynamicTokensProvider).textPrimary,
                               ),
                             ),
@@ -172,8 +182,10 @@ class _QuestionInputPageState extends ConsumerState<QuestionInputPage> {
             delay: const Duration(milliseconds: 200),
             child: Text(
               'あなたの質問',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: TextStyle(
+                fontSize: DynamicTokens.fontSizeTitleLarge,
+                fontWeight: FontWeight.w600,
+                color: ref.watch(dynamicTokensProvider).textPrimary,
               ),
             ),
           ),
@@ -207,8 +219,10 @@ class _QuestionInputPageState extends ConsumerState<QuestionInputPage> {
               delay: const Duration(milliseconds: 300),
               child: Text(
                 '選択肢の詳細',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  fontSize: DynamicTokens.fontSizeTitleLarge,
+                  fontWeight: FontWeight.w600,
+                  color: ref.watch(dynamicTokensProvider).textPrimary,
                 ),
               ),
             ),
@@ -250,7 +264,8 @@ class _QuestionInputPageState extends ConsumerState<QuestionInputPage> {
               delay: const Duration(milliseconds: 450),
               child: Text(
                 '※ 選択肢を具体的に入力すると、より精密な解読が得られます。空欄の場合は質問文から自動判定します。',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                style: TextStyle(
+                  fontSize: DynamicTokens.fontSizeCaption,
                   color: ref.watch(dynamicTokensProvider).textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
@@ -259,11 +274,17 @@ class _QuestionInputPageState extends ConsumerState<QuestionInputPage> {
             ],
             
             const SizedBox(height: DynamicTokens.spacingXl),
-            
-            // 次へボタン
-            FadeInUp(
-              duration: DynamicTokens.animationDuration,
-              delay: const Duration(milliseconds: 300),
+          ],
+        ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                DynamicTokens.spacingMd,
+                0,
+                DynamicTokens.spacingMd,
+                DynamicTokens.spacingMd,
+              ),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -272,7 +293,7 @@ class _QuestionInputPageState extends ConsumerState<QuestionInputPage> {
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: dynamicTokens.primaryColor,
-                    foregroundColor: Colors.white,
+                    foregroundColor: DynamicTokens.textWhite,
                   ),
                   child: const Text('次へ'),
                 ),

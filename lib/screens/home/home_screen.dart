@@ -12,6 +12,12 @@ import 'package:mystic_tarot_jp/models/daily_card_info.dart'; // 导入新模型
 import 'package:mystic_tarot_jp/providers/ai_reading_provider.dart';
 import 'package:mystic_tarot_jp/widgets/ai_reading_widget.dart';
 import 'package:mystic_tarot_jp/services/supabase_service.dart';
+import 'package:mystic_tarot_jp/themes/tokens.dart';
+import 'package:mystic_tarot_jp/core/l10n/localization_service.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
+import 'package:mystic_tarot_jp/widgets/app_tag.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mystic_tarot_jp/core/ui/app_logo.dart';
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
@@ -27,19 +33,39 @@ class HomeScreen extends HookConsumerWidget {
     final now = DateTime.now();
 
     final dynamicTokens = ref.watch(dynamicTokensProvider);
+    final strings = ref.watch(appStringsProvider);
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        elevation: 2,
+        scrolledUnderElevation: 2,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.black.withOpacity(0.08),
+        centerTitle: true,
+        backgroundColor: dynamicTokens.backgroundColor,
+        title: const AppLogo(size: 36),
+        automaticallyImplyLeading: false,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
+              ? dynamicTokens.primaryColor.withOpacity(0.6)
+              : dynamicTokens.primaryColor.withOpacity(0.2),
+          ),
+        ),
+      ),
       body: ThemedBackground(
         child: SingleChildScrollView(
           child: Column(
           children: [
-            // 状态栏空间
-            const SizedBox(height: 60),
+            // 统一与其他页面一致的顶部间距
+            const SizedBox(height: 20),
             
             // 离线模式提示
             if (isOfflineMode)
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
+                margin: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingMd),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: dynamicTokens.primaryColor.withOpacity(0.08),
@@ -48,13 +74,13 @@ class HomeScreen extends HookConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.wifi_off, color: dynamicTokens.primaryColor, size: 20),
+                    Icon(AppIcons.wifiOff, color: dynamicTokens.primaryColor, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '離線模式 - 正在使用本地データ',
+                        '${strings.labelOfflineMode} - ${strings.messageOfflineModeDescription}',
                         style: TextStyle(
-                          color: dynamicTokens.primaryColor,
+                          color: DynamicTokens.textBlack87,
                           fontSize: 14,
                         ),
                       ),
@@ -65,8 +91,8 @@ class HomeScreen extends HookConsumerWidget {
                         ref.refresh(dailyCardProvider);
                       },
                       child: Text(
-                        '再接続',
-                        style: TextStyle(color: dynamicTokens.primaryColor),
+                        strings.buttonRetry,
+                        style: TextStyle(color: DynamicTokens.textBlack87),
                       ),
                     ),
                   ],
@@ -75,82 +101,116 @@ class HomeScreen extends HookConsumerWidget {
             
             const SizedBox(height: 20),
             
-            // 标题
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const _ConstellationDivider(),
-                const SizedBox(width: 16),
-                Text(
-                  '本日のカード',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    fontFamily: 'Noto Serif JP',
-                    color: dynamicTokens.primaryColor,
-                    shadows: [
-                      Shadow(
-                        color: Colors.white.withOpacity(0.8),
-                        offset: const Offset(0, 0),
-                        blurRadius: 2,
-                      ),
-                      Shadow(
-                        color: dynamicTokens.primaryColor.withOpacity(0.5),
-                        offset: const Offset(1, 1),
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
+            // 本日のカード模块（带底框，去掉两侧装饰icon）
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingMd),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? [
+                    DesignTokens.surfaceColor.withOpacity(0.95),
+                    DesignTokens.surfaceColor.withOpacity(0.90),
+                  ] : [
+                    dynamicTokens.surfaceColor.withOpacity(0.8),
+                    dynamicTokens.surfaceColor.withOpacity(0.6),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                const _ConstellationDivider(isReversed: true),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-            
-            // 今日的卡片部分
-            _HomeDailyCard(
-              dailyCardState: dailyCardState,
-              heroCardHeight: heroCardHeight,
-              ref: ref,
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // 今日のメッセージ（抽牌后自动生成并显示）
-            if (dailyCardState.hasDrawnToday && dailyCardState.card != null)
-              _TodayAISection(
-                card: dailyCardState.card!,
-                isUpright: dailyCardState.isUpright,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
+                      ? dynamicTokens.primaryColor.withOpacity(0.6)
+                      : dynamicTokens.primaryColor.withOpacity(0.2),
+                  width: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? 2 : 1,
+                ),
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    strings.homeDailyCard,
+                    style: TextStyle(
+                      fontSize: DynamicTokens.fontSizeHeadlineMedium,
+                      fontWeight: DynamicTokens.fontWeightBlack,
+                      fontFamily: DynamicTokens.fontFamilyHeadline,
+                      color: DynamicTokens.textBlack87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _HomeDailyCard(
+                    dailyCardState: dailyCardState,
+                    heroCardHeight: heroCardHeight,
+                    ref: ref,
+                  ),
+                  if (dailyCardState.hasDrawnToday && dailyCardState.card != null) ...[
+                    const SizedBox(height: 12),
+                    // 卡名（居中，主色强调）
+                    Text(
+                      dailyCardState.card!.nameJa,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: DynamicTokens.fontSizeTitleLarge,
+                        fontWeight: FontWeight.w600,
+                        color: dynamicTokens.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    // 正/逆位标签（主题色 + overlay）
+                    AppTag(
+                      dailyCardState.isUpright ? strings.labelUpright : strings.labelReversed,
+                      useTheme: true,
+                      overlay: true,
+                    ),
+                  ],
+                  SizedBox(height: 8 * 1.6),
+                  // 长按提示移动到卡片下方，抽到后隐藏
+                  if (!dailyCardState.hasDrawnToday)
+                    Text(
+                      strings.homeLongPressToDraw,
+                      style: TextStyle(
+                        color: DynamicTokens.textBlack87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  // 抽牌后整合AI解释模块紧随其后
+                  if (dailyCardState.hasDrawnToday && dailyCardState.card != null) ...[
+                    const SizedBox(height: 12),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final ai = ref.watch(aiReadingProvider('daily'));
+                        if (ai.state == AIReadingState.idle) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) async {
+                            await _ensureDailyAIReading(ref, dailyCardState.card!, dailyCardState.isUpright);
+                          });
+                        }
+                        return const AIReadingWidget(readingType: 'daily', compact: true);
+                      },
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            
+            // 今日のメッセージ整合进上方模块展示（此处不再单独渲染）
             
             const SizedBox(height: 40),
             
-            // 日历标题
-            Text(
-              'タロットカレンダー',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: dynamicTokens.textPrimary,
-              ),
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // 日历（添加背景框包装，自适应高度）
+            // 日历（添加背景框包装，自适应高度；标题内置模块内部）
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 2),
+              margin: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingMd),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? [
                     // 有背景图的主题：使用高透明度白色背景
-                    Colors.white.withOpacity(0.95),
-                    Colors.white.withOpacity(0.90),
+                    DesignTokens.surfaceColor.withOpacity(0.95),
+                    DesignTokens.surfaceColor.withOpacity(0.90),
                   ] : [
                     // 纯色背景主题：保持原来的surface颜色
                     dynamicTokens.surfaceColor.withOpacity(0.8),
@@ -164,50 +224,56 @@ class HomeScreen extends HookConsumerWidget {
                     : dynamicTokens.primaryColor.withOpacity(0.2),
                   width: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? 2 : 1,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                // no box shadows
               ),
-              child: IntrinsicHeight(
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    final now = DateTime.now();
-                    final monthlyCardsAsync = ref.watch(monthlyCardsProvider(
-                      MonthlyCardParams(now.year, now.month),
-                    ));
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    strings.homeTarotCalendar,
+                    style: TextStyle(
+                      fontSize: DynamicTokens.fontSizeTitleLarge,
+                      fontWeight: FontWeight.w600,
+                      color: DynamicTokens.textBlack87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final now = DateTime.now();
+                      final monthlyCardsAsync = ref.watch(monthlyCardsProvider(
+                        MonthlyCardParams(now.year, now.month),
+                      ));
 
-                    return monthlyCardsAsync.when(
-                      data: (cardMap) => MonthCalendar(
-                        cardMap: cardMap,
-                        onDayTap: (date) => _onCalendarDayTap(context, ref, date, cardMap),
-                        onMonthChanged: (_) {},
-                      ),
-                      loading: () => SizedBox(
-                        height: 280,
-                        child: Center(
-                          child: Icon(Icons.auto_awesome, size: 40, color: dynamicTokens.primaryColor.withOpacity(0.35)),
+                      return monthlyCardsAsync.when(
+                        data: (cardMap) => MonthCalendar(
+                          cardMap: cardMap,
+                          onDayTap: (date) => _onCalendarDayTap(context, ref, date, cardMap),
+                          onMonthChanged: (_) {},
                         ),
-                      ),
-                      error: (error, stack) => SizedBox(
-                        height: 280,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.error, color: Colors.red, size: 48),
-                              SizedBox(height: 12),
-                              Text('データの読み込みに失敗しました', style: TextStyle(color: Colors.red)),
-                            ],
+                        loading: () => SizedBox(
+                          height: 280,
+                          child: Center(
+                            child: Icon(AppIcons.autoAwesome, size: 40, color: dynamicTokens.primaryColor.withOpacity(0.35)),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                        error: (error, stack) => SizedBox(
+                          height: 280,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(AppIcons.error, color: DynamicTokens.textError, size: 48),
+                                SizedBox(height: 12),
+                                Text('データの読み込みに失敗しました', style: TextStyle(color: DynamicTokens.textError)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
@@ -221,7 +287,7 @@ class HomeScreen extends HookConsumerWidget {
           return BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             currentIndex: 0,
-            selectedItemColor: dynamicTokens.primaryColor,
+            selectedItemColor: dynamicTokens.textPrimary,
             unselectedItemColor: dynamicTokens.textSecondary,
             onTap: (index) {
               switch (index) {
@@ -241,19 +307,19 @@ class HomeScreen extends HookConsumerWidget {
             },
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home),
+                icon: Icon(AppIcons.home),
                 label: '毎日の占い',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.auto_awesome),
+                icon: Icon(AppIcons.autoAwesome),
                 label: 'スプレット',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.library_books),
+                icon: Icon(AppIcons.libraryBooks),
                 label: 'ギャラリー',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.style),
+                icon: Icon(AppIcons.style),
                 label: 'マイページ',
               ),
             ],
@@ -261,6 +327,16 @@ class HomeScreen extends HookConsumerWidget {
         },
       ),
     );
+  }
+
+  // 触发每日AI解读（若处于idle），避免刷新后卡在loading
+  Future<void> _ensureDailyAIReading(WidgetRef ref, TarotCard card, bool isUpright) async {
+    try {
+      final notifier = ref.read(aiReadingProvider('daily').notifier);
+      await notifier.getDailyReading(card: card, isUpright: isUpright);
+    } catch (_) {
+      // ignore; 由 AIReadingWidget 展示错误
+    }
   }
 
   void _onCalendarDayTap(BuildContext context, WidgetRef ref, DateTime date,
@@ -273,13 +349,30 @@ class HomeScreen extends HookConsumerWidget {
       // 未来
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
-          content: const Text('その日までお待ちください'),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('了解')),
-          ],
+        builder: (_) => Consumer(
+          builder: (context, ref, __) {
+            final strings = ref.watch(appStringsProvider);
+            return AlertDialog(
+              content: Text(
+                strings.dialogPleaseWaitTillDay,
+                style: const TextStyle(
+                  color: DynamicTokens.textBlack87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: DynamicTokens.textBlack87,
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(strings.commonOk),
+                ),
+              ],
+            );
+          },
         ),
       );
       return;
@@ -287,16 +380,44 @@ class HomeScreen extends HookConsumerWidget {
 
     final cardInfo = cardMap[tapped];
     if (cardInfo == null) {
-      // 没抽牌
+      // 今日未抽：提供“本日のカードを引く”按钮
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
-          content: const Text('履歴はありません'),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('了解')),
-          ],
+        builder: (_) => Consumer(
+          builder: (context, ref, __) {
+            final strings = ref.watch(appStringsProvider);
+            return AlertDialog(
+              content: Text(
+                strings.messageNoHistory,
+                style: const TextStyle(
+                  color: DynamicTokens.textBlack87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: DynamicTokens.textBlack87,
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(strings.commonOk),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: DynamicTokens.textBlack87,
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ref.read(dailyCardProvider.notifier).drawTodayCard();
+                  },
+                  child: Text(strings.buttonDrawTodayCard),
+                ),
+              ],
+            );
+          },
         ),
       );
       return;
@@ -429,10 +550,10 @@ class _HomeDailyCardState extends State<_HomeDailyCard> with TickerProviderState
       // 显示成功提示
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('本日のカードを引きました！'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: const Text('本日のカードを引きました！'),
+            backgroundColor: DynamicTokens.textSuccess,
+            duration: const Duration(seconds: 2),
           ),
         );
         
@@ -453,7 +574,7 @@ class _HomeDailyCardState extends State<_HomeDailyCard> with TickerProviderState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('抽牌失敗: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: DynamicTokens.textError,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -471,7 +592,7 @@ class _HomeDailyCardState extends State<_HomeDailyCard> with TickerProviderState
                 width: widget.heroCardHeight * 0.7,
                 height: widget.heroCardHeight,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
+                  color: DesignTokens.surfaceColor.withOpacity(0.4),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Center(child: CircularProgressIndicator()),
@@ -483,18 +604,18 @@ class _HomeDailyCardState extends State<_HomeDailyCard> with TickerProviderState
                     width: widget.heroCardHeight * 0.7,
                     height: widget.heroCardHeight,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
+                      color: DesignTokens.surfaceColor.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.error, color: Colors.red, size: 48),
+                          Icon(AppIcons.error, color: DynamicTokens.textError, size: 48),
                           const SizedBox(height: 16),
                           Text(
                             'エラーが発生しました',
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: DynamicTokens.textError),
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
@@ -542,54 +663,16 @@ class _HomeDailyCardState extends State<_HomeDailyCard> with TickerProviderState
       height: widget.heroCardHeight,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: FutureBuilder<String>(
-              future: CardBackService.getCurrentBackImageUrl(),
-              builder: (context, snapshot) {
-                final backUrl = snapshot.data ?? 'assets/images/tarot/cat/back.png';
-                return Image.asset(
-                  backUrl,
-                  fit: BoxFit.contain,
-                );
-              },
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: Colors.black.withOpacity(0.25),
-            ),
-          ),
-          Center(
-            child: Text(
-              '長押ししてカードを引く',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    blurRadius: 4.0,
-                    color: Colors.black.withOpacity(0.5),
-                    offset: const Offset(2.0, 2.0),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: FutureBuilder<String>(
+          future: CardBackService.getCurrentBackImageUrl(),
+          builder: (context, snapshot) {
+            final backUrl = snapshot.data ?? 'assets/images/tarot/cat/back.png';
+            return Image.asset(backUrl, fit: BoxFit.contain);
+          },
+        ),
       ),
     );
   }
@@ -600,7 +683,7 @@ class _HomeDailyCardState extends State<_HomeDailyCard> with TickerProviderState
         width: widget.heroCardHeight * 0.65,
         height: widget.heroCardHeight,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
+          color: DesignTokens.surfaceColor.withOpacity(0.4),
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Center(
@@ -620,13 +703,6 @@ class _HomeDailyCardState extends State<_HomeDailyCard> with TickerProviderState
         height: widget.heroCardHeight,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
@@ -639,9 +715,9 @@ class _HomeDailyCardState extends State<_HomeDailyCard> with TickerProviderState
               fit: BoxFit.contain, // 修改fit属性
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: Theme.of(context).colorScheme.surface.withOpacity(0.4),
+                  color: DesignTokens.surfaceColor.withOpacity(0.4),
                   child: const Center(
-                    child: Icon(Icons.image_not_supported, size: 48),
+                    child: Icon(AppIcons.imageNotSupported, size: 48),
                   ),
                 );
               },
@@ -658,7 +734,7 @@ class _CardBackPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
+      ..color = DynamicTokens.textWhite.withOpacity(0.1)
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
@@ -770,21 +846,52 @@ class _ConstellationPainter extends CustomPainter {
 
 
   void _showCardDetail(BuildContext context, TarotCard card, bool isUpright) {
-  showDialog(
+    showDialog(
     context: context,
     builder: (_) {
       // 不再需要FutureBuilder，因为数据已经加载完毕
       return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 700),
-          child: Stack(
+        child: Consumer(
+          builder: (context, ref, __) {
+            final dt = ref.watch(dynamicTokensProvider);
+            final bool useBgImage = (dt.isDark || dt.backgroundImage != null);
+            final ScrollController _dialogScrollController = ScrollController();
+            return Container(
+              constraints: const BoxConstraints(maxWidth: 400, maxHeight: 700),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: useBgImage
+                      ? [
+                          DesignTokens.surfaceColor.withOpacity(0.95),
+                          DesignTokens.surfaceColor.withOpacity(0.90),
+                        ]
+                      : [
+                          dt.surfaceColor.withOpacity(0.8),
+                          dt.surfaceColor.withOpacity(0.6),
+                        ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: useBgImage
+                      ? dt.primaryColor.withOpacity(0.6)
+                      : dt.primaryColor.withOpacity(0.2),
+                  width: useBgImage ? 2 : 1,
+                ),
+              ),
+              child: Stack(
             children: [
-              // 主要内容
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: SingleChildScrollView(
-                  child: Column(
+              // 主要内容（去掉自定义滚动条，恢复基础滚动）
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: ScrollConfiguration(
+                    behavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
+                    child: SingleChildScrollView(
+                      controller: _dialogScrollController,
+                      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                 // 卡片图像 - 根据正逆位旋转
@@ -799,78 +906,63 @@ class _ConstellationPainter extends CustomPainter {
                 ),
                 const SizedBox(height: 16),
 
-                // 卡片名称
-                Text(
-                  card.nameJa,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  card.nameEn,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
+                // 卡片名称（根据语言仅显示一个）
+                Consumer(builder: (context, ref, _) {
+                  final lang = ref.watch(localizationServiceProvider);
+                  final displayName = (lang == SupportedLanguage.english) ? card.nameEn : card.nameJa;
+                  return Text(
+                    displayName,
+                    style: TextStyle(
+                      fontSize: DynamicTokens.fontSizeHeadlineLarge,
+                      fontWeight: FontWeight.w600,
+                      color: DynamicTokens.textBlack87,
+                    ),
+                  );
+                }),
 
                 const SizedBox(height: 16),
 
-                // 当前方向指示
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: (isUpright ? Colors.green : Colors.red).withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isUpright ? Colors.green : Colors.red,
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    isUpright ? '正位置' : '逆位置',
-                    style: TextStyle(
-                      color: isUpright ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                // 当前方向指示（与首页抽卡标签完全一致：黑系淡填充+淡描边）
+                Consumer(builder: (context, ref, _) {
+                  final strings = ref.watch(appStringsProvider);
+                  return AppTag(
+                    isUpright ? strings.labelUpright : strings.labelReversed,
+                    useTheme: true,
+                    overlay: true,
+                  );
+                }),
 
                 const SizedBox(height: 16),
 
                 // 故事
                 Consumer(builder: (context, ref, _) {
                   final dt = ref.watch(dynamicTokensProvider);
+                  final strings = ref.watch(appStringsProvider);
                   return Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: dt.primaryColor.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(8),
-                      border:
-                          Border.all(color: dt.primaryColor.withOpacity(0.22)),
+                      border: Border.all(color: dt.primaryColor.withOpacity(0.22)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '物語り',
-                          textAlign: TextAlign.left, // 左对齐
+                          strings.labelStory,
+                          textAlign: TextAlign.left,
                           style: TextStyle(
-                            fontWeight: FontWeight.normal, // 不加粗
-                            fontSize: 14,
-                            color: dt.primaryColor.withOpacity(0.7),
+                            fontWeight: FontWeight.w600,
+                            fontSize: DynamicTokens.fontSizeBodyMedium,
+                            color: DynamicTokens.textBlack87,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           card.story,
-                          style: const TextStyle(
-                            fontSize: 14,
+                          style: TextStyle(
+                            fontSize: DynamicTokens.fontSizeBodyMedium,
                             height: 1.4,
                           ),
                         ),
@@ -881,149 +973,138 @@ class _ConstellationPainter extends CustomPainter {
 
                 const SizedBox(height: 16),
 
-                // 正逆位含义
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: (isUpright ? Colors.green : Colors.red).withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: (isUpright ? Colors.green : Colors.red).withOpacity(0.22),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isUpright ? '正位置' : '逆位置',
-                        textAlign: TextAlign.left, // 左对齐
-                        style: TextStyle(
-                          fontWeight: FontWeight.normal, // 不加粗
-                          fontSize: 14,
-                          color: (isUpright ? Colors.green : Colors.red).withOpacity(0.7),
-                        ),
+                // 含义模块（去掉位置标签，标题样式与“物語り”一致；容器主题色）
+                Consumer(builder: (context, ref, _) {
+                  final dt = ref.watch(dynamicTokensProvider);
+                  final strings = ref.watch(appStringsProvider);
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: dt.primaryColor.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: dt.primaryColor.withOpacity(0.22),
                       ),
-                      const SizedBox(height: 8),
-                      Builder(
-                        builder: (context) {
-                          final meaningText = isUpright
-                              ? card.meaningUpright
-                              : card.meaningReversed;
-                          final parsed = _parseTextContent(meaningText);
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (parsed['title']!.isNotEmpty) ...[
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Text(
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Builder(
+                          builder: (context) {
+                            final meaningText = isUpright
+                                ? card.meaningUpright
+                                : card.meaningReversed;
+                            final parsed = _parseTextContent(meaningText);
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (parsed['title']!.isNotEmpty) ...[
+                                  Text(
                                     parsed['title']!,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                      fontSize: DynamicTokens.fontSizeBodyMedium,
+                                      fontWeight: FontWeight.w600,
                                       height: 1.4,
+                                      color: DynamicTokens.textBlack87,
                                     ),
                                   ),
-                                ),
-                                if (parsed['content']!.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
+                                  if (parsed['content']!.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      parsed['content']!,
+                                      style: TextStyle(
+                                        fontSize: DynamicTokens.fontSizeBodyMedium,
+                                        height: 1.4,
+                                        color: DynamicTokens.textBlack87,
+                                      ),
+                                    ),
+                                  ],
+                                ] else ...[
                                   Text(
-                                    parsed['content']!,
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    meaningText,
+                                    style: TextStyle(
+                                      fontSize: DynamicTokens.fontSizeBodyMedium,
                                       height: 1.4,
+                                      color: DynamicTokens.textBlack87,
                                     ),
                                   ),
                                 ],
-                              ] else ...[
-                                Text(
-                                  meaningText,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    height: 1.4,
-                                  ),
-                                ),
                               ],
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      // 移除キーワード标题，直接显示标签
-                      Builder(
-                        builder: (context) {
-                          final keywords = isUpright
-                              ? card.uprightKeywordsList
-                              : card.reversedKeywordsList;
-
-                          if (keywords.isEmpty) {
-                            return const Text(
-                              'キーワードデータなし',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                fontStyle: FontStyle.italic,
-                              ),
                             );
-                          }
-
-                          return Wrap(
-                            spacing: 6,
-                            runSpacing: 4,
-                            children: keywords
-                                .take(8)
-                                .map((keyword) => Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: (isUpright ? Colors.green : Colors.red).withOpacity(0.16),
-                                        borderRadius:
-                                            BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: (isUpright ? Colors.green : Colors.red).withOpacity(0.3),
-                                        ),
-                                      ),
-                                      child: Text(
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        // 移除キーワード标题，直接显示标签
+                        Builder(
+                          builder: (context) {
+                            final keywords = isUpright
+                                ? card.uprightKeywordsList
+                                : card.reversedKeywordsList;
+                            if (keywords.isEmpty) {
+                              return Text(
+                                strings.messageNoKeywords,
+                                style: TextStyle(
+                                  fontSize: DynamicTokens.fontSizeBodySmall,
+                                  color: DynamicTokens.textGrey500,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              );
+                            }
+                            return Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: keywords
+                                  .take(8)
+                                  .map((keyword) => AppTag(
                                         keyword,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: isUpright
-                                              ? Colors.green.shade700
-                                              : Colors.red.shade700,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ))
-                                .toList(),
-                          );
-                        },
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        borderRadius: 20,
+                                        fontSize: DynamicTokens.fontSizeBodySmall,
+                                        useTheme: true,
+                                        overlay: true,
+                                      ))
+                                  .toList(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                  ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
-                  ],
-                ),
-              ),
-            ),
-            // 关闭按钮 - 右上角X按钮
+            // 关闭按钮 - 右上角X按钮（统一 24x24, icon 16, 间距 8）
             Positioned(
               top: 8,
               right: 8,
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.black.withOpacity(0.08),
-                  foregroundColor: Colors.grey[600],
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(AppIcons.close, size: 16),
+                  style: IconButton.styleFrom(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    minimumSize: const Size(24, 24),
+                    backgroundColor: DynamicTokens.textBlack87.withOpacity(0.08),
+                    foregroundColor: DynamicTokens.textGrey600,
+                  ),
                 ),
               ),
             ),
           ],
         ),
-      ),
-    );
+      );
+          },
+        ),
+      );
     },
   );
 }
@@ -1050,7 +1131,7 @@ class _TodayAISection extends ConsumerWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: DesignTokens.spacingMd),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -1058,8 +1139,8 @@ class _TodayAISection extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? [
             // 有背景图的主题：使用高透明度白色背景
-            Colors.white.withOpacity(0.95),
-            Colors.white.withOpacity(0.90),
+            DesignTokens.surfaceColor.withOpacity(0.95),
+            DesignTokens.surfaceColor.withOpacity(0.90),
           ] : [
             // 纯色背景主题：使用主色调的淡色背景
             dynamicTokens.primaryColor.withOpacity(0.15),
@@ -1073,13 +1154,7 @@ class _TodayAISection extends ConsumerWidget {
             : dynamicTokens.primaryColor.withOpacity(0.35),
           width: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? 2 : 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        // no box shadows
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1087,46 +1162,35 @@ class _TodayAISection extends ConsumerWidget {
           // 标题行
           Row(
             children: [
-              Icon(Icons.auto_stories, color: dynamicTokens.primaryColor.withOpacity(0.8), size: 20),
-              const SizedBox(width: 8),
-              Text(
-                '今日のメッセージ',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
-                    ? dynamicTokens.primaryColor
-                    : dynamicTokens.primaryColor.withOpacity(0.8),
-                ),
-              ),
+              // 去掉标题与图标，仅保留右侧牌名与正逆位标签
               const Spacer(),
-              // 右侧显示牌名 + 正逆位，提升语境
               Consumer(
                 builder: (context, ref, child) {
                   final dynamicTokens = ref.watch(dynamicTokensProvider);
+                  final strings = ref.watch(appStringsProvider);
                   return Row(
                     children: [
-                      Text(card.nameJa, style: TextStyle(
-                        fontSize: 12, 
-                        color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : Colors.grey,
-                      )),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: (isUpright ? Colors.green : Colors.red).withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: isUpright ? Colors.green : Colors.red, width: 0.8),
-                    ),
-                    child: Text(
-                      isUpright ? '正位置' : '逆位置',
-                      style: TextStyle(
-                        color: isUpright ? Colors.green : Colors.red,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                      Text(
+                        card.nameJa,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: dynamicTokens.textSecondary,
+                            ) ?? TextStyle(
+                              fontSize: DynamicTokens.fontSizeBodySmall,
+                              color: dynamicTokens.textSecondary,
+                            ),
                       ),
-                    ),
-                  ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isUpright ? strings.labelUpright : strings.labelReversed,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: dynamicTokens.textSecondary,
+                              fontWeight: FontWeight.w600,
+                            ) ?? TextStyle(
+                              color: dynamicTokens.textSecondary,
+                              fontSize: DynamicTokens.fontSizeBodySmall,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
                     ],
                   );
                 },

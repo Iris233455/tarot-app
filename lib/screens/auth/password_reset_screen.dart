@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:mystic_tarot_jp/services/supabase_service.dart';
 import 'package:mystic_tarot_jp/core/config/supabase_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 
 class PasswordResetScreen extends StatefulWidget {
   const PasswordResetScreen({super.key});
@@ -95,7 +97,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          icon: Icon(AppIcons.arrowBack, color: theme.colorScheme.onSurface),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -120,17 +122,48 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                     Text(
                       _emailSent ? 'メール送信完了' : 'パスワードを忘れた方',
                       style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      _emailSent 
-                          ? 'パスワードリセット用のリンクを送信しました。\n\n📧 メールをご確認ください\n🔗 リンクをクリックして新しいパスワードを設定\n\n⚠️ 重要：このブラウザでリンクを開いてください'
-                          : 'パスワードリセット用のリンクをお送りします。\nメールアドレスを入力してください。',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _emailSent
+                              ? 'パスワードリセット用のリンクを送信しました。'
+                              : 'パスワードリセット用のリンクをお送りします。\nメールアドレスを入力してください。',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                        ),
+                        if (_emailSent) ...[
+                          const SizedBox(height: 8),
+                          const Row(
+                            children: [
+                              Icon(AppIcons.emailOutlined, size: 16),
+                              SizedBox(width: 6),
+                              Expanded(child: Text('メールをご確認ください')),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          const Row(
+                            children: [
+                              Icon(AppIcons.link, size: 16),
+                              SizedBox(width: 6),
+                              Expanded(child: Text('リンクをクリックして新しいパスワードを設定')),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          const Row(
+                            children: [
+                              Icon(AppIcons.warningAmber, size: 16, color: DynamicTokens.textWarning),
+                              SizedBox(width: 6),
+                              Expanded(child: Text('重要：このブラウザでリンクを開いてください')),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -138,8 +171,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
               
               const SizedBox(height: 40),
               
-              if (!_emailSent) ...[
-                // 邮箱输入
+              if (!_emailSent)
                 FadeInUp(
                   delay: const Duration(milliseconds: 100),
                   child: Column(
@@ -149,35 +181,33 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'メールアドレス',
-                          prefixIcon: const Icon(Icons.email_outlined),
+                          prefixIcon: const Icon(AppIcons.emailOutlined),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                       ),
-                      
                       const SizedBox(height: 24),
-                      
-                      // 错误信息
-                      if (_errorMessage != null) ...[
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.errorContainer,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            _errorMessage!,
-                            style: TextStyle(
-                              color: theme.colorScheme.onErrorContainer,
+                      if (_errorMessage != null)
+                        Column(
+                          children: [
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.errorContainer,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                _errorMessage!,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onErrorContainer,
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: 24),
+                          ],
                         ),
-                        const SizedBox(height: 24),
-                      ],
-                      
-                      // 发送按钮
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -204,45 +234,64 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                       ),
                     ],
                   ),
-                ),
-              ] else ...[
-                // 发送成功状态
+                )
+              else
                 FadeInUp(
                   delay: const Duration(milliseconds: 100),
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(DynamicTokens.spacingMd),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.green.shade200),
+                      color: DynamicTokens.textSuccess.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
+                      border: Border.all(color: DynamicTokens.textSuccess.withOpacity(0.3)),
                     ),
                     child: Column(
                       children: [
                         Icon(
                           Icons.email_outlined,
                           size: 48,
-                          color: Colors.green.shade600,
+                          color: DynamicTokens.textSuccess,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           _emailController.text,
                           style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'にパスワードリセット用のメールを送信しました。\n\n📧 メールのリンクをクリックすると、\n安全なページでパスワードを変更できます。\n\n⚠️ 重要：このブラウザでリンクを開いてください',
-                          style: theme.textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'にパスワードリセット用のメールを送信しました。',
+                              style: theme.textTheme.bodyMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            const Row(
+                              children: [
+                                Icon(AppIcons.emailOutlined, size: 16),
+                                SizedBox(width: 6),
+                                Expanded(child: Text('メールのリンクをクリックすると、安全なページでパスワードを変更できます。')),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            const Row(
+                              children: [
+                                Icon(AppIcons.warningAmber, size: 16, color: DynamicTokens.textWarning),
+                                SizedBox(width: 6),
+                                Expanded(child: Text('重要：このブラウザでリンクを開いてください')),
+                              ],
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                       ],
                     ),
                   ),
                 ),
-              ],
               
               const SizedBox(height: 24),
               

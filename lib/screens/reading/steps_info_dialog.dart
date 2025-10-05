@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/data_service.dart';
 import '../../models/tarot_card.dart';
 import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 
 class StepsInfoDialog extends ConsumerStatefulWidget {
   final String spreadType;
@@ -106,7 +107,7 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(DynamicTokens.spacingLg),
         constraints: const BoxConstraints(
           maxWidth: 560,
           maxHeight: 720,
@@ -131,17 +132,26 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                             child: Text(
                               (_meta?['title'] as String?) ?? _spreadInfo!.name,
                               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                          IconButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            icon: const Icon(Icons.close),
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(AppIcons.close, size: 16),
+                              style: IconButton.styleFrom(
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                minimumSize: const Size(24, 24),
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: DynamicTokens.spacingMd),
 
                       // 顶部图片（spreads_1/2/3）
                       if (_meta != null) ...[
@@ -160,7 +170,7 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                       // Description / message
                       if (((_meta?['message'] ?? '') as String).isNotEmpty || _spreadInfo!.description != null) ...[
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(DynamicTokens.spacingMd),
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(12),
@@ -171,11 +181,11 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                           child: Row(
                             children: [
                               Icon(
-                                Icons.info_outline,
+                                AppIcons.infoOutline,
                                 color: Theme.of(context).colorScheme.primary,
                                 size: 20,
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: DynamicTokens.spacingSm),
                               Expanded(
                                 child: Text(
                                   (((_meta?['message'] ?? '') as String).isNotEmpty)
@@ -187,7 +197,7 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: DynamicTokens.spacingLg),
                       ],
                       
                       // Steps（来自 contents.json 的 steps 优先）
@@ -197,7 +207,7 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: DynamicTokens.spacingSm),
                       
                       Flexible(
                         child: ListView.builder(
@@ -206,7 +216,7 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                           itemBuilder: (context, index) {
                             final step = _getSteps()[index];
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.only(bottom: DynamicTokens.spacingSm),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -223,12 +233,12 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                                         style: TextStyle(
                                           color: Theme.of(context).colorScheme.onPrimary,
                                           fontSize: 12,
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  const SizedBox(width: DynamicTokens.spacingSm),
                                   Expanded(
                                     child: Text(
                                       step,
@@ -242,7 +252,7 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: DynamicTokens.spacingSm),
 
                       // 質問ポイント
                       if (_getQuestionPoints().isNotEmpty) ...[
@@ -252,9 +262,9 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: DynamicTokens.spacingXs),
                         ..._getQuestionPoints().map((p) => Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
+                          padding: const EdgeInsets.only(bottom: DynamicTokens.spacingXs),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -266,7 +276,7 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                       ],
 
                       if (widget.showNextButton) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: DynamicTokens.spacingMd),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -274,9 +284,14 @@ class _StepsInfoDialogState extends ConsumerState<StepsInfoDialog> {
                               onPressed: () => Navigator.of(context).pop(false),
                               child: const Text('キャンセル'),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: DynamicTokens.spacingXs),
                             ElevatedButton(
                               onPressed: () => Navigator.of(context).pop(true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ref.read(dynamicTokensProvider).primaryColor,
+                                foregroundColor: DynamicTokens.textWhite,
+                                elevation: 0,
+                              ),
                               child: const Text('次へ'),
                             ),
                           ],

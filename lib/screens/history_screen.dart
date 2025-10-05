@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:mystic_tarot_jp/core/theme/app_theme.dart';
 import 'package:mystic_tarot_jp/providers/history_provider.dart';
 import 'package:mystic_tarot_jp/services/supabase_service.dart';
+import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -26,11 +28,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        elevation: 2,
+        scrolledUnderElevation: 2,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.black.withOpacity(0.08),
+        centerTitle: true,
+        backgroundColor: ref.watch(dynamicTokensProvider).backgroundColor,
         title: const Text('履歴'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(AppIcons.arrowBack),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               context.pop();
@@ -39,18 +45,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             }
           },
         ),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.backgroundColor,
-              AppTheme.surfaceColor,
-            ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: (ref.watch(dynamicTokensProvider).isDark || ref.watch(dynamicTokensProvider).backgroundImage != null)
+                ? ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.6)
+                : ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.2),
           ),
         ),
+      ),
+      body: Container(
+        color: ref.watch(dynamicTokensProvider).backgroundColor,
         child: SafeArea(
           child: historyAsync.when(
             data: (readings) {
@@ -61,37 +67,26 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.history,
-                        color: Colors.white54,
-                        size: 64,
-                      ),
-                      const SizedBox(height: AppTheme.spacingM),
+                      const Icon(AppIcons.history, color: DynamicTokens.textGrey500, size: 64),
+                      const SizedBox(height: DynamicTokens.spacingMd),
                       Text(
                         'まだ履歴がありません',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.white70,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: DynamicTokens.textBlack87),
                       ),
-                      const SizedBox(height: AppTheme.spacingS),
+                      const SizedBox(height: DynamicTokens.spacingSm),
                       Text(
                         'No reading history yet',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white54,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: DynamicTokens.textGrey600),
                       ),
-                      const SizedBox(height: AppTheme.spacingL),
-                      ElevatedButton(
-                        onPressed: () => context.go('/draw-cards'),
-                        child: const Text('カードを引く'),
-                      ),
+                      const SizedBox(height: DynamicTokens.spacingLg),
+                      const SizedBox.shrink(),
                     ],
                   ),
                 );
               }
               
               return ListView.builder(
-                padding: const EdgeInsets.all(AppTheme.spacingL),
+                padding: const EdgeInsets.all(DynamicTokens.spacingLg),
                 itemCount: uiList.length,
                 itemBuilder: (context, index) {
                   final reading = uiList[index];
@@ -101,10 +96,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     key: ValueKey<String>('reading_$readingId'),
                     direction: DismissDirection.endToStart,
                     background: Container(
-                      color: Colors.redAccent,
+                      color: DynamicTokens.textError,
                       alignment: Alignment.centerRight,
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: const Icon(Icons.delete_outline, color: Colors.white),
+                      padding: const EdgeInsets.symmetric(horizontal: DynamicTokens.spacingLg),
+                      child: const Icon(AppIcons.deleteOutline, color: DynamicTokens.textWhite),
                     ),
                     confirmDismiss: (_) async {
                       return await _confirmDelete(context);
@@ -187,11 +182,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final date = DateTime.tryParse(reading['created_at'] ?? '') ?? DateTime.now();
     
     return Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
+      margin: const EdgeInsets.only(bottom: DynamicTokens.spacingMd),
       decoration: BoxDecoration(
-        color: Colors.black12,
-        borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        boxShadow: AppTheme.cardShadow,
+        color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
+        border: Border.all(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.18)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -202,9 +197,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               context.push('/history/$id');
             }
           },
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
           child: Padding(
-            padding: const EdgeInsets.all(AppTheme.spacingM),
+            padding: const EdgeInsets.all(DynamicTokens.spacingMd),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -213,55 +208,37 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.spacingM,
-                        vertical: AppTheme.spacingS,
+                        horizontal: DynamicTokens.spacingMd,
+                        vertical: DynamicTokens.spacingSm,
                       ),
                       decoration: BoxDecoration(
                         color: _getReadingTypeColor(reading['spread_id'] ?? ''),
-                        borderRadius: BorderRadius.circular(AppTheme.radiusS),
+                        borderRadius: BorderRadius.circular(DynamicTokens.radiusSm),
                       ),
                       child: Text(
                         _getReadingTypeText(reading['spread_id'] ?? ''),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: AppTheme.fontSizeSmall,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(color: DynamicTokens.textWhite, fontWeight: FontWeight.w600),
                       ),
                     ),
                     const Spacer(),
                     Text(
                       dateFormat.format(date),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: AppTheme.fontSizeSmall,
-                      ),
+                      style: const TextStyle(color: DynamicTokens.textGrey600),
                     ),
                   ],
                 ),
                 
-                const SizedBox(height: AppTheme.spacingM),
+                const SizedBox(height: DynamicTokens.spacingMd),
                 
                 // 質問
                 if ((reading['question'] ?? '').toString().isNotEmpty) ...[
-                  Text(
-                    '質問',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: AppTheme.primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: AppTheme.spacingS),
-                  Text(
-                    (reading['question'] ?? '').toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: AppTheme.fontSizeMedium,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppTheme.spacingM),
+                  Text('質問', style: const TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: DynamicTokens.spacingSm),
+                  Text((reading['question'] ?? '').toString(),
+                      style: const TextStyle(color: DynamicTokens.textBlack87),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: DynamicTokens.spacingMd),
                 ],
                 
                 // 时间已在头部显示；卡片内容至此结束（不展示解釈/詳細按钮）
@@ -274,16 +251,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   Color _getReadingTypeColor(String type) {
-    switch (type) {
-      case 'one':
-        return AppTheme.primaryColor;
-      case 'two':
-        return AppTheme.secondaryColor;
-      case 'three':
-        return AppTheme.accentColor;
-      default:
-        return AppTheme.primaryColor;
-    }
+    // 统一为当前主题主色
+    return ref.watch(dynamicTokensProvider).primaryColor;
   }
 
   String _getReadingTypeText(String type) {

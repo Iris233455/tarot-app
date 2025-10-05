@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import 'package:mystic_tarot_jp/services/supabase_service.dart';
 import 'package:mystic_tarot_jp/widgets/ai_reading_widget.dart';
 import 'package:mystic_tarot_jp/providers/ad_watched_provider.dart';
 import 'package:mystic_tarot_jp/providers/subscription_provider.dart';
+import 'package:mystic_tarot_jp/widgets/app_tag.dart';
 
 class ResultPage extends ConsumerStatefulWidget {
   const ResultPage({super.key});
@@ -27,6 +29,8 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   bool _hasBeenSaved = false; // 是否已经保存过
   // 通过build阶段检测AI完成来保存，无需在initState中注册监听
   String? _savedReadingId; // 已保存记录的ID（用于后续更新）
+  // 缓存卡面原始宽高比（用来精确绘制选中边框）
+  final Map<String, double> _imageAspectRatioCache = {};
 
   @override
   void initState() {
@@ -70,6 +74,30 @@ class _ResultPageState extends ConsumerState<ResultPage> {
     if (ai.state == AIReadingState.completed && ai.result.isNotEmpty) {
       await doSave(ai.result);
       return;
+    }
+  }
+
+  /// 确保缓存指定资产的原始宽高比（异步解析一次）
+  void _ensureImageAspect(String assetPath) {
+    if (_imageAspectRatioCache.containsKey(assetPath)) return;
+    try {
+      final ImageStream stream = AssetImage(assetPath)
+          .resolve(createLocalImageConfiguration(context));
+      ImageStreamListener? listener;
+      listener = ImageStreamListener((ImageInfo info, bool _) {
+        final double aspect = info.image.width / info.image.height;
+        if (mounted) {
+          setState(() {
+            _imageAspectRatioCache[assetPath] = aspect;
+          });
+        }
+        stream.removeListener(listener!);
+      }, onError: (dynamic _, __) {
+        // 失败时忽略，使用默认比值
+      });
+      stream.addListener(listener);
+    } catch (_) {
+      // ignore
     }
   }
 
@@ -206,7 +234,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
               children: [
                 // 卡片展示区域
                 Container(
-                  height: cardCount == 1 ? 400 : 280, // 设置固定高度而不是使用Expanded
+                  height: cardCount == 1 ? 400 : 310, // 微调高度，消除底部多余空白
                   padding: const EdgeInsets.all(DynamicTokens.spacingMd),
                   child: cardCount == 1
                       ? _buildSingleCard(cards[0], orientations[0])
@@ -220,11 +248,11 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                     children: [
                       // タブ：AI診断 / カードの解釈
                       Container(
-                        height: 50,
+                        height: 68,
                         child: Row(
                           children: [
-                            _buildTab(0, 'AI診断', Icons.auto_awesome),
-                            _buildTab(1, 'カードの解釈', Icons.lightbulb),
+                            _buildTab(0, 'AI診断', AppIcons.autoAwesome),
+                            _buildTab(1, 'カードの解釈', AppIcons.lightbulb),
                           ],
                         ),
                       ),
@@ -254,7 +282,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: dynamicTokens.primaryColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: DynamicTokens.textWhite,
                       ),
                       child: const Text('もう一度占う'),
                     ),
@@ -273,12 +301,14 @@ class _ResultPageState extends ConsumerState<ResultPage> {
 
   Widget _buildSingleCard(TarotCard card, bool isUpright) {
     final dynamicTokens = ref.watch(dynamicTokensProvider);
+    _ensureImageAspect(card.imageUrl);
+    final double singleAR = _imageAspectRatioCache[card.imageUrl] ?? 0.7;
     
     return FadeIn(
       duration: DynamicTokens.animationDuration,
       child: Center(
         child: AspectRatio(
-          aspectRatio: 0.7, // 标准塔罗牌比例
+          aspectRatio: singleAR, // 使用图片真实比例
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(DynamicTokens.radiusSm), // 统一使用较小圆角
@@ -311,7 +341,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
               ),
               child: Center(
                 child: Icon(
-                  Icons.auto_awesome,
+                  AppIcons.autoAwesome,
                   size: 64,
                   color: dynamicTokens.primaryColor.withOpacity(0.3),
                 ),
@@ -349,29 +379,20 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                     delay: Duration(milliseconds: index * 100),
                     child: Column(
                       children: [
-                        // 标签 - 缩小尺寸
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: DesignTokens.spacingXs,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _selectedCardIndex == index
-                                ? dynamicTokens.primaryColor
-                                : dynamicTokens.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
-                          ),
-                          child: Text(
-                            labels[index],
-                            style: TextStyle(
-                              color: _selectedCardIndex == index
-                                  ? Colors.white
-                                  : dynamicTokens.primaryColor,
+                        // 标签 - 使用与首页一致的 AppTag 样式
+                        Builder(builder: (context) {
+                          final bool isSelected = _selectedCardIndex == index;
+                          return Center(
+                            child: AppTag(
+                              labels[index],
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              borderRadius: 12,
                               fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                              useTheme: isSelected,
+                              overlay: isSelected,
                             ),
-                          ),
-                        ),
+                          );
+                        }),
                         
                         const SizedBox(height: DesignTokens.spacingXs),
                         
@@ -384,7 +405,11 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                               });
                             },
                             child: AspectRatio(
-                              aspectRatio: 0.6, // 调整为更接近标准塔罗牌比例
+                              aspectRatio: (() {
+                                final path = cards[index].imageUrl;
+                                _ensureImageAspect(path);
+                                return _imageAspectRatioCache[path] ?? 0.6;
+                              })(), // 使用图片真实比例
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
@@ -402,6 +427,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                                         child: Image.asset(
                                           cards[index].imageUrl,
                                           fit: BoxFit.contain,
+                                          alignment: Alignment.center,
                                           errorBuilder: (context, error, stackTrace) {
                                             return Container(
                                                                               decoration: BoxDecoration(
@@ -412,11 +438,11 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                                       dynamicTokens.primaryColor.withOpacity(0.1),
                                       dynamicTokens.primaryColor.withOpacity(0.05),
                                     ],
-                                  ),
+                                      ),
                                 ),
                                 child: Center(
                                   child: Icon(
-                                    Icons.auto_awesome,
+                                    AppIcons.autoAwesome,
                                     size: 32,
                                     color: dynamicTokens.primaryColor.withOpacity(0.3),
                                   ),
@@ -427,50 +453,35 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                                       ),
                                     ),
                                     
-                                    // 选中边框 - 单独的覆盖层
+                                    // 选中边框 - 直接覆盖容器区域（图片使用 contain 居中显示）
                                     if (_selectedCardIndex == index)
                                       Positioned.fill(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-                                                                        border: Border.all(
-                              color: dynamicTokens.primaryColor,
-                              width: 3,
-                            ),
+                                        child: IgnorePointer(
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                                              border: Border.all(color: dynamicTokens.primaryColor, width: 3),
+                                            ),
                                           ),
                                         ),
                                       ),
                                     
-                                    // 方向指示器
-                                    Positioned(
-                                      top: 2,
-                                      right: 2,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 3,
-                                          vertical: 1,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: orientations[index] 
-                                              ? Colors.green.withOpacity(0.8)
-                                              : Colors.orange.withOpacity(0.8),
-                                          borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
-                                        ),
-                                        child: Text(
-                                          orientations[index] ? '正位置' : '逆位置',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 8,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    // 方向指示器（已移至卡片下方显示）
                                   ],
                                 ),
                               ),
                             ),
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        // 方向指示器放在卡片下方，居中显示，样式与首页一致
+                        AppTag(
+                          orientations[index] ? '正位置' : '逆位置',
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          borderRadius: 16,
+                          fontSize: 10,
+                          useTheme: true,
+                          overlay: true,
                         ),
                       ],
                     ),
@@ -521,28 +532,31 @@ class _ResultPageState extends ConsumerState<ResultPage> {
               ),
             ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                color: isSelected 
-                    ? dynamicTokens.primaryColor
-                    : ref.watch(dynamicTokensProvider).textSecondary,
-                size: 20,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
                   color: isSelected 
                       ? dynamicTokens.primaryColor
                       : ref.watch(dynamicTokensProvider).textSecondary,
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  size: 20,
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected 
+                        ? dynamicTokens.primaryColor
+                        : ref.watch(dynamicTokensProvider).textSecondary,
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -581,18 +595,18 @@ class _ResultPageState extends ConsumerState<ResultPage> {
           // 牌名
           Text(
             firstCard.nameJa,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: dynamicTokens.primaryColor,
+              fontWeight: FontWeight.w600,
+              color: DynamicTokens.textBlack87,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             firstCard.nameEn,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
-              color: ref.watch(dynamicTokensProvider).textSecondary,
+              color: DynamicTokens.textBlack87,
             ),
           ),
           const SizedBox(height: DynamicTokens.spacingMd),
@@ -601,18 +615,18 @@ class _ResultPageState extends ConsumerState<ResultPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: firstOrientation ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+              color: firstOrientation ? DynamicTokens.textSuccess.withOpacity(0.1) : DynamicTokens.textError.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: firstOrientation ? Colors.green : Colors.red,
+                color: firstOrientation ? DynamicTokens.textSuccess : DynamicTokens.textError,
                 width: 1,
               ),
             ),
             child: Text(
               firstOrientation ? '正位置' : '逆位置',
               style: TextStyle(
-                color: firstOrientation ? Colors.green : Colors.red,
-                fontWeight: FontWeight.bold,
+                color: firstOrientation ? DynamicTokens.textSuccess : DynamicTokens.textError,
+                fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
             ),
@@ -625,10 +639,10 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             width: double.infinity,
             padding: const EdgeInsets.all(DynamicTokens.spacingMd),
             decoration: BoxDecoration(
-              color: dynamicTokens.primaryColor.withOpacity(0.05),
+              color: DynamicTokens.textGrey600.withOpacity(0.08),
               borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
               border: Border.all(
-                color: dynamicTokens.primaryColor.withOpacity(0.1),
+                color: DynamicTokens.textGrey600.withOpacity(0.25),
               ),
             ),
             child: _buildParsedMeaningContent(resultText),
@@ -649,20 +663,20 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             parsed['title']!,
             style: const TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-              height: 1.3,
+              fontWeight: FontWeight.w600,
+              color: DynamicTokens.textBlack87,
+              height: 1.4,
             ),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.left,
           ),
           if (parsed['content']!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
               parsed['content']!,
               style: const TextStyle(
-                fontSize: 11,
-                color: Colors.black87,
-                height: 1.4,
+                fontSize: 12,
+                color: DynamicTokens.textBlack87,
+                height: 1.6,
               ),
             ),
           ],
@@ -670,9 +684,9 @@ class _ResultPageState extends ConsumerState<ResultPage> {
           Text(
             meaningText,
             style: const TextStyle(
-              fontSize: 11,
-              color: Colors.black87,
-              height: 1.4,
+              fontSize: 12,
+              color: DynamicTokens.textBlack87,
+              height: 1.6,
             ),
           ),
         ],
@@ -730,8 +744,8 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             card.nameJa,
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: ref.watch(dynamicTokensProvider).primaryColor,
+              fontWeight: FontWeight.w600,
+              color: ref.watch(dynamicTokensProvider).textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -755,7 +769,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             isUpright ? '正位置' : '逆位置',
             isUpright ? card.meaningUpright : card.meaningReversed,
             isUpright ? card.uprightKeywordsList : card.reversedKeywordsList,
-            isUpright ? Colors.green : Colors.red,
+            isUpright ? DynamicTokens.textSuccess : DynamicTokens.textError,
           ),
         ],
       ),
@@ -779,19 +793,15 @@ class _ResultPageState extends ConsumerState<ResultPage> {
           Text(
             '物語り',
             style: TextStyle(
-              fontWeight: FontWeight.normal,
+              fontWeight: FontWeight.w600,
               fontSize: 12,
-              color: dynamicTokens.primaryColor.withOpacity(0.7),
+              color: DynamicTokens.textBlack87,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             content,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Colors.black87,
-              height: 1.4,
-            ),
+            style: const TextStyle(fontSize: 12, color: DynamicTokens.textBlack87, height: 1.6),
           ),
         ],
       ),
@@ -828,26 +838,19 @@ class _ResultPageState extends ConsumerState<ResultPage> {
   
   // 紧凑版的含义区块（包含关键词）
   Widget _buildCompactMeaningSection(String title, String meaning, List<String> keywords, Color color) {
+    final dynamicTokens = ref.watch(dynamicTokensProvider);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: dynamicTokens.primaryColor.withOpacity(0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: dynamicTokens.primaryColor.withOpacity(0.22)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.normal,
-              fontSize: 12,
-              color: color.withOpacity(0.7),
-            ),
-          ),
-          const SizedBox(height: 6),
+          // 位置标签移除，仅展示正文与关键词
           _buildCompactParsedContent(meaning),
           const SizedBox(height: 8),
           // Keywords标签
@@ -855,27 +858,14 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             Wrap(
               spacing: 4,
               runSpacing: 4,
-              children: keywords.take(6).map((keyword) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: color.withOpacity(0.4)),
-                  ),
-                  child: Text(
-                    keyword,
-                    style: TextStyle(
-                      color: Color.fromRGBO(
-                        (color.red * 0.7).round(),
-                        (color.green * 0.7).round(),
-                        (color.blue * 0.7).round(),
-                        1.0,
-                      ),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+              children: keywords.take(6).map<Widget>((keyword) {
+                return AppTag(
+                  keyword,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  borderRadius: 20,
+                  fontSize: 10,
+                  useTheme: true,
+                  overlay: true,
                 );
               }).toList(),
             ),
@@ -897,11 +887,11 @@ class _ResultPageState extends ConsumerState<ResultPage> {
               parsed['title']!,
               style: const TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-                height: 1.3,
+                fontWeight: FontWeight.w600,
+                color: DynamicTokens.textBlack87,
+                height: 1.4,
               ),
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.left,
             ),
           ),
           if (parsed['content']!.isNotEmpty) ...[
@@ -909,9 +899,9 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             Text(
               parsed['content']!,
               style: const TextStyle(
-                fontSize: 11,
-                color: Colors.black87,
-                height: 1.4,
+                fontSize: 12,
+                color: DynamicTokens.textBlack87,
+                height: 1.6,
               ),
             ),
           ],
@@ -919,9 +909,9 @@ class _ResultPageState extends ConsumerState<ResultPage> {
           Text(
             text,
             style: const TextStyle(
-              fontSize: 11,
-              color: Colors.black87,
-              height: 1.4,
+              fontSize: 12,
+              color: DynamicTokens.textBlack87,
+              height: 1.6,
             ),
           ),
         ],
@@ -939,7 +929,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             card.nameJa,
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: ref.watch(dynamicTokensProvider).primaryColor,
             ),
           ),
@@ -964,7 +954,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             isUpright ? '正位置' : '逆位置',
             isUpright ? card.meaningUpright : card.meaningReversed,
             isUpright ? card.uprightKeywordsList : card.reversedKeywordsList,
-            isUpright ? Colors.green : Colors.red,
+            isUpright ? DynamicTokens.textSuccess : DynamicTokens.textError,
           ),
         ],
       ),
@@ -980,7 +970,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
         Text(
           'キーワード',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: ref.watch(dynamicTokensProvider).textPrimary,
           ),
         ),
@@ -1003,7 +993,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                 style: TextStyle(
                   color: dynamicTokens.primaryColor,
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             );
@@ -1020,7 +1010,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
         Text(
           '解釈',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: ref.watch(dynamicTokensProvider).textPrimary,
           ),
         ),
@@ -1043,16 +1033,16 @@ class _ResultPageState extends ConsumerState<ResultPage> {
         Text(
           'シェア',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: DynamicTokens.spacingMd),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildShareButton(Icons.share, 'シェア'),
-            _buildShareButton(Icons.copy, 'コピー'),
-            _buildShareButton(Icons.download, '保存'),
+            _buildShareButton(AppIcons.share, 'シェア'),
+            _buildShareButton(AppIcons.copy, 'コピー'),
+            _buildShareButton(AppIcons.download, '保存'),
           ],
         ),
       ],
@@ -1109,7 +1099,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
             style: TextStyle(
               color: isActive ? dynamicTokens.primaryColor : ref.watch(dynamicTokensProvider).textSecondary,
               fontSize: 12,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
         ],
@@ -1243,18 +1233,18 @@ class _ResultPageState extends ConsumerState<ResultPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              const Icon(Icons.play_circle_outline, size: 48, color: Colors.orange),
+              const Icon(AppIcons.playCircleOutline, size: 48, color: DynamicTokens.textWarning),
               const SizedBox(height: 8),
               const Text(
                 '広告視聴が必要です',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Text(
                 hasActiveSubscription.value == true 
                     ? 'プレミアム会員として無制限解読をお楽しみいただけます。'
                     : '質問入力画面で広告を視聴するか、プレミアム購読でお楽しみください。',
-                style: TextStyle(color: Colors.grey[600]),
+                style: TextStyle(color: DynamicTokens.textGrey600),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1447,7 +1437,7 @@ class _ResultPageState extends ConsumerState<ResultPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('AI解読の取得に失敗しました: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: DynamicTokens.textError,
           ),
         );
       }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:mystic_tarot_jp/core/theme/app_theme.dart';
 import 'package:mystic_tarot_jp/models/tarot_card.dart';
 import 'package:mystic_tarot_jp/services/card_back_service.dart';
@@ -144,15 +145,6 @@ class _TarotCardWidgetState extends State<TarotCardWidget>
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        boxShadow: [
-          ...AppTheme.cardShadow,
-          if (_isHovered)
-            BoxShadow(
-              color: AppTheme.accentColor.withOpacity(0.3),
-              blurRadius: 20,
-              spreadRadius: 2,
-            ),
-        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
@@ -179,15 +171,6 @@ class _TarotCardWidgetState extends State<TarotCardWidget>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
         color: Colors.white,
-        boxShadow: [
-          ...AppTheme.cardShadow,
-          if (_isHovered)
-            BoxShadow(
-              color: AppTheme.accentColor.withOpacity(0.3),
-              blurRadius: 20,
-              spreadRadius: 2,
-            ),
-        ],
       ),
       child: Column(
         children: [
@@ -234,7 +217,7 @@ class _TarotCardWidgetState extends State<TarotCardWidget>
                       widget.card.nameJa,
                       style: const TextStyle(
                         fontSize: AppTheme.fontSizeSmall,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                       maxLines: 1,
@@ -268,16 +251,16 @@ class _TarotCardWidgetState extends State<TarotCardWidget>
                             _getSuitName(),
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                         const Spacer(),
                         Icon(
                           _isMajorArcana()
-                              ? Icons.star
-                              : Icons.style,
+                              ? AppIcons.star
+                              : AppIcons.style,
                           size: 12,
                           color: Colors.grey[500],
                         ),
@@ -305,7 +288,7 @@ class _TarotCardWidgetState extends State<TarotCardWidget>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.image,
+                  AppIcons.imageNotSupported,
                   size: 48,
                   color: Colors.grey[600],
                 ),
@@ -315,7 +298,7 @@ class _TarotCardWidgetState extends State<TarotCardWidget>
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: AppTheme.fontSizeSmall,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
                 ),

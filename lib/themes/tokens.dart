@@ -15,18 +15,17 @@ class DesignTokens {
   static const double radiusSm = 8.0;
   static const double radiusXs = 4.0; // 更小的圆角，用于牌面等元素
   
-  // Shadows
-  static const List<BoxShadow> shadowCard = [
-    BoxShadow(
-      color: Color(0x14000000), // opacity 0.08
-      blurRadius: 12,
-      offset: Offset(0, 4),
-    ),
-  ];
+  // Shadows 取消统一使用
+  static const List<BoxShadow> shadowCard = [];
   
   // Typography
-  static const String fontFamilyHeadline = 'NotoSerifJP';
+  static const String fontFamilyHeadline = 'NotoSansJP';
   static const String fontFamilyBody = 'NotoSansJP';
+  
+  // Text Shadows (统一文本阴影规范)
+  static const List<Shadow> textShadowNone = [];
+  static const List<Shadow> textShadowSubtle = [];
+  static const List<Shadow> textShadowTitle = [];
   
   // Animation
   static const Duration animationDuration = Duration(milliseconds: 200);

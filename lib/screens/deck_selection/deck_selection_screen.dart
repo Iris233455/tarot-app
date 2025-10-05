@@ -8,6 +8,7 @@ import 'package:mystic_tarot_jp/providers/deck_provider.dart';
 import 'package:mystic_tarot_jp/providers/tarot_providers.dart';
 import 'package:mystic_tarot_jp/providers/daily_card_provider.dart';
 import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 
 class DeckSelectionScreen extends ConsumerStatefulWidget {
   const DeckSelectionScreen({super.key});
@@ -29,7 +30,7 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
       appBar: AppBar(
         title: const Text('タロットデッキ選択'),
         backgroundColor: dynamicTokens.surfaceColor,
-        foregroundColor: dynamicTokens.primaryColor,
+        foregroundColor: dynamicTokens.textPrimary,
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(24),
@@ -39,17 +40,17 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
             child: currentDeckAsync.when(
               loading: () => const Text(
                 '読み込み中...',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(fontSize: 14, color: DynamicTokens.textGrey600),
               ),
               error: (error, stack) => const Text(
                 '使用するタロットカードを選択',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(fontSize: 14, color: DynamicTokens.textGrey600),
               ),
               data: (currentDeck) => Text(
                 currentDeck?.nameJp ?? '使用するタロットカードを選択',
                 style: TextStyle(
                   fontSize: 14, 
-                  color: dynamicTokens.primaryColor.withOpacity(0.7),
+                  color: DynamicTokens.textGrey600,
                 ),
               ),
             ),
@@ -59,9 +60,10 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
       body: allDecksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => _buildErrorState(error),
-        data: (allDecks) => allDecks.isEmpty 
-            ? _buildEmptyState() 
-            : _buildDeckList(allDecks, currentDeckId),
+        data: (allDecks) {
+          final filtered = allDecks.where((d) => d.nameEn != 'Golden Tarot' && d.nameEn != 'Mystic Dreamer Tarot').toList();
+          return filtered.isEmpty ? _buildEmptyState() : _buildDeckList(filtered, currentDeckId);
+        },
       ),
     );
   }
@@ -113,11 +115,11 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error, size: 64, color: Colors.red),
+          const Icon(AppIcons.error, size: 64, color: DynamicTokens.textError),
           const SizedBox(height: 16),
           Text(
             'エラーが発生しました\n$error',
-            style: const TextStyle(fontSize: 16, color: Colors.red),
+            style: const TextStyle(fontSize: 16, color: DynamicTokens.textError),
             textAlign: TextAlign.center,
           ),
         ],
@@ -130,11 +132,11 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.style, size: 64, color: Colors.grey),
+          Icon(AppIcons.style, size: 64, color: DynamicTokens.textGrey600),
           SizedBox(height: 16),
           Text(
             '利用可能なデッキがありません',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
+            style: TextStyle(fontSize: 18, color: DynamicTokens.textGrey600),
           ),
         ],
       ),
@@ -180,8 +182,8 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
                             height: 90,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey[300]!),
-                              color: Colors.grey[100],
+                              border: Border.all(color: DynamicTokens.textGrey600.withOpacity(0.3)),
+                              color: DynamicTokens.textGrey600.withOpacity(0.08),
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
@@ -190,11 +192,11 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
-                                    color: Colors.grey[200],
+                                    color: DynamicTokens.textGrey600.withOpacity(0.12),
                                     child: const Icon(
-                                      Icons.style,
+                                      AppIcons.style,
                                       size: 30,
-                                      color: Colors.grey,
+                                      color: DynamicTokens.textGrey600,
                                     ),
                                   );
                                 },
@@ -212,28 +214,28 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
                                 Text(
                                   deck.nameJp,
                                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected ? dynamicTokens.primaryColor : null,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected ? dynamicTokens.textPrimary : DynamicTokens.textBlack87,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   deck.nameEn,
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey[600],
+                                    color: DynamicTokens.textGrey600,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   '作者: ${deck.author}',
                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[500],
+                                    color: DynamicTokens.textGrey600,
                                   ),
                                 ),
                                 Text(
                                   '年代: ${deck.year}',
                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[500],
+                                    color: DynamicTokens.textGrey600,
                                   ),
                                 ),
                               ],
@@ -250,7 +252,7 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
                           else
                             Icon(
                               Icons.radio_button_unchecked,
-                              color: Colors.grey[400],
+                              color: DynamicTokens.textGrey600,
                               size: 30,
                             ),
                         ],
@@ -272,15 +274,15 @@ class _DeckSelectionScreenState extends ConsumerState<DeckSelectionScreen> {
                           margin: const EdgeInsets.only(top: 8),
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: dynamicTokens.primaryColor.withOpacity(0.1),
+                            color: DynamicTokens.textGrey600.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             'デフォルト',
                             style: TextStyle(
-                              color: dynamicTokens.primaryColor,
+                              color: DynamicTokens.textGrey600,
                               fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),

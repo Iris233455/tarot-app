@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mystic_tarot_jp/themes/tokens.dart';
 import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:mystic_tarot_jp/providers/tarot_providers.dart';
 import 'package:mystic_tarot_jp/services/data_service.dart';
 import 'package:mystic_tarot_jp/models/tarot_card.dart';
@@ -209,9 +210,9 @@ class _FormatSelectPageState extends ConsumerState<FormatSelectPage> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? [
-                          // 有背景图的主题：使用高透明度白色背景
-                          Colors.white.withOpacity(0.95),
-                          Colors.white.withOpacity(0.90),
+                          // 有背景图的主题：使用高透明度白色背景（统一使用 DesignTokens.surfaceColor）
+                          DesignTokens.surfaceColor.withOpacity(0.95),
+                          DesignTokens.surfaceColor.withOpacity(0.90),
                         ] : [
                           // 纯色背景主题：保持原来的surface颜色
                           dynamicTokens.surfaceColor.withOpacity(0.8),
@@ -219,13 +220,7 @@ class _FormatSelectPageState extends ConsumerState<FormatSelectPage> {
                         ],
                       ),
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
+                      // no box shadows
                       border: Border.all(
                         color: isSelected
                             ? dynamicTokens.primaryColor
@@ -252,7 +247,7 @@ class _FormatSelectPageState extends ConsumerState<FormatSelectPage> {
                                       color: dynamicTokens.primaryColor.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
                                     ),
-                                    child: Icon(Icons.image, color: dynamicTokens.primaryColor),
+                                    child: Icon(AppIcons.imageNotSupported, color: dynamicTokens.primaryColor),
                                   );
                                 },
                               ),
@@ -262,10 +257,10 @@ class _FormatSelectPageState extends ConsumerState<FormatSelectPage> {
                           Text(
                             spread['title'],
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                               color: isSelected 
                                 ? dynamicTokens.primaryColor 
-                                : ((dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : ref.watch(dynamicTokensProvider).textPrimary),
+                                : ((dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? DynamicTokens.textBlack87 : ref.watch(dynamicTokensProvider).textPrimary),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -275,7 +270,7 @@ class _FormatSelectPageState extends ConsumerState<FormatSelectPage> {
                             Text(
                               spread['description'],
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : ref.watch(dynamicTokensProvider).textSecondary,
+                                color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? DynamicTokens.textGrey600 : ref.watch(dynamicTokensProvider).textSecondary,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,

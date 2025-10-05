@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mystic_tarot_jp/core/theme/app_theme.dart';
@@ -7,6 +8,7 @@ import 'package:mystic_tarot_jp/widgets/tarot_card_widget.dart';
 import 'package:mystic_tarot_jp/models/tarot_card.dart';
 import 'package:mystic_tarot_jp/services/data_service.dart';
 import 'dart:math';
+import 'package:mystic_tarot_jp/core/theme/dynamic_tokens.dart';
 
 // 抽牌流程状态枚举
 enum CardDrawState { initial, shuffling, cutting, drawing, revealed }
@@ -225,9 +227,7 @@ class _DrawCardsScreenState extends ConsumerState<DrawCardsScreen>
             fit: BoxFit.cover
           ),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: const [
-            BoxShadow(blurRadius: 6, offset: Offset(0, 2)),
-          ],
+          // no box shadows
         ),
       ),
     );
@@ -274,7 +274,7 @@ class _DrawCardsScreenState extends ConsumerState<DrawCardsScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(AppIcons.arrowBack),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               context.pop();
@@ -323,7 +323,7 @@ class _DrawCardsScreenState extends ConsumerState<DrawCardsScreen>
       margin: const EdgeInsets.all(AppTheme.spacingM),
       padding: const EdgeInsets.all(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: DynamicTokens.textBlack87.withOpacity(0.07),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
       ),
       child: Column(
@@ -331,7 +331,7 @@ class _DrawCardsScreenState extends ConsumerState<DrawCardsScreen>
           Text(
             'カードの枚数を選択',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.white,
+              color: DynamicTokens.textWhite,
             ),
           ),
           const SizedBox(height: AppTheme.spacingM),
@@ -346,7 +346,7 @@ class _DrawCardsScreenState extends ConsumerState<DrawCardsScreen>
                   decoration: BoxDecoration(
                     color: _selectedCardCount == count
                         ? AppTheme.primaryColor
-                        : Colors.white24,
+                        : DynamicTokens.textWhite54,
                     borderRadius: BorderRadius.circular(AppTheme.radiusM),
                   ),
                   child: Center(
@@ -354,10 +354,10 @@ class _DrawCardsScreenState extends ConsumerState<DrawCardsScreen>
                       count.toString(),
                       style: TextStyle(
                         color: _selectedCardCount == count
-                            ? Colors.white
-                            : Colors.white70,
+                            ? DynamicTokens.textWhite
+                            : DynamicTokens.textWhite70,
                         fontSize: AppTheme.fontSizeLarge,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

@@ -25,6 +25,8 @@ class FallbackStrings extends AppStringsBase {
   String get homeTarotCalendar => _orFallback(primary.homeTarotCalendar, fallback.homeTarotCalendar);
   @override
   String get homeTodayMessage => _orFallback(primary.homeTodayMessage, fallback.homeTodayMessage);
+  @override
+  String get homeLongPressToDraw => _orFallback(primary.homeLongPressToDraw, fallback.homeLongPressToDraw);
 
   // ==================== 占卜流程 ====================
   @override
@@ -37,6 +39,8 @@ class FallbackStrings extends AppStringsBase {
   String get readingQuestion => _orFallback(primary.readingQuestion, fallback.readingQuestion);
   @override
   String get readingInterpretation => _orFallback(primary.readingInterpretation, fallback.readingInterpretation);
+  @override
+  String get labelQuestionPoints => _orFallback(primary.labelQuestionPoints, fallback.labelQuestionPoints);
 
   // ==================== 页面标题/标签 ====================
   @override
@@ -98,6 +102,8 @@ class FallbackStrings extends AppStringsBase {
   @override
   String get buttonConfirm => _orFallback(primary.buttonConfirm, fallback.buttonConfirm);
   @override
+  String get buttonNext => _orFallback(primary.buttonNext, fallback.buttonNext);
+  @override
   String get buttonRedeemNow => _orFallback(primary.buttonRedeemNow, fallback.buttonRedeemNow);
   @override
   String get buttonCheckCode => _orFallback(primary.buttonCheckCode, fallback.buttonCheckCode);
@@ -109,6 +115,8 @@ class FallbackStrings extends AppStringsBase {
   String get buttonDelete => _orFallback(primary.buttonDelete, fallback.buttonDelete);
   @override
   String get buttonDrawAgain => _orFallback(primary.buttonDrawAgain, fallback.buttonDrawAgain);
+  @override
+  String get buttonDrawTodayCard => _orFallback(primary.buttonDrawTodayCard, fallback.buttonDrawTodayCard);
 
   // ==================== 状态消息 ====================
   @override
@@ -461,6 +469,28 @@ class FallbackStrings extends AppStringsBase {
   String get labelEmotionConsciousness => _orFallback(primary.labelEmotionConsciousness, fallback.labelEmotionConsciousness);
   @override
   String get labelCauseSolution => _orFallback(primary.labelCauseSolution, fallback.labelCauseSolution);
+  
+  // ==================== 抽牌/洗切牌 页面（Shuffle/Draw） ====================
+  @override
+  String get readingPreparing => _orFallback(primary.readingPreparing, fallback.readingPreparing);
+  @override
+  String get readingShuffling => _orFallback(primary.readingShuffling, fallback.readingShuffling);
+  @override
+  String get readingCutting => _orFallback(primary.readingCutting, fallback.readingCutting);
+  @override
+  String get readingDrawing => _orFallback(primary.readingDrawing, fallback.readingDrawing);
+  @override
+  String get readingResultTitle => _orFallback(primary.readingResultTitle, fallback.readingResultTitle);
+  @override
+  String get readingComplete => _orFallback(primary.readingComplete, fallback.readingComplete);
+  @override
+  String get hintSwipeUpToPick => _orFallback(primary.hintSwipeUpToPick, fallback.hintSwipeUpToPick);
+  @override
+  String get hintDragToSlot => _orFallback(primary.hintDragToSlot, fallback.hintDragToSlot);
+  @override
+  String get errorDrawFailed => _orFallback(primary.errorDrawFailed, fallback.errorDrawFailed);
+  @override
+  String get buttonSeeResult => _orFallback(primary.buttonSeeResult, fallback.buttonSeeResult);
   @override
   String get readingTitle => _orFallback(primary.readingTitle, fallback.readingTitle);
   @override

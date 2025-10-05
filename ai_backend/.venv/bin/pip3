@@ -1,4 +1,4 @@
-#!/Users/iris.z/Desktop/Tarot/project/ai_backend/.venv/bin/python3
+#!/Users/toshunmei/Desktop/Tarot/Tarot_Card_App/ai_backend/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

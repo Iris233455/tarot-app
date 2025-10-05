@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
+import 'package:mystic_tarot_jp/themes/tokens.dart';
+import 'package:mystic_tarot_jp/core/l10n/localization_service.dart';
 import 'package:mystic_tarot_jp/services/data_service.dart';
 import 'package:mystic_tarot_jp/providers/tarot_providers.dart';
 import 'package:mystic_tarot_jp/providers/ad_reward_provider.dart';
@@ -83,6 +86,7 @@ class _SpreadIntroPageState extends ConsumerState<SpreadIntroPage> {
   @override
   Widget build(BuildContext context) {
     final dynamicTokens = ref.watch(dynamicTokensProvider);
+    final strings = ref.watch(appStringsProvider);
     final String title = (_meta?['title'] as String?) ?? ref.watch(readingFormatProvider);
     return _loading
         ? const Center(child: CircularProgressIndicator())
@@ -97,7 +101,7 @@ class _SpreadIntroPageState extends ConsumerState<SpreadIntroPage> {
                       // image（缩小并完整显示）
                       Container(
                         height: 180,
-                        color: Colors.white,
+                        color: DesignTokens.surfaceColor,
                         alignment: Alignment.center,
                         child: Image.asset(
                           _resolveImagePath(),
@@ -109,8 +113,8 @@ class _SpreadIntroPageState extends ConsumerState<SpreadIntroPage> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          '説明',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                          strings.readingExplanation,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                       const SizedBox(height: DynamicTokens.spacingSm),
@@ -123,8 +127,8 @@ class _SpreadIntroPageState extends ConsumerState<SpreadIntroPage> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            '質問のポイント',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                            strings.labelQuestionPoints,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
                           ),
                         ),
                         const SizedBox(height: DynamicTokens.spacingSm),
@@ -147,11 +151,8 @@ class _SpreadIntroPageState extends ConsumerState<SpreadIntroPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () => _handleNextButton(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: dynamicTokens.primaryColor,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: const Text('次へ'),
+                    style: ElevatedButton.styleFrom(backgroundColor: dynamicTokens.primaryColor, foregroundColor: DynamicTokens.textWhite),
+                    child: Text(strings.buttonNext),
                   ),
                 ),
               ],
@@ -209,75 +210,61 @@ class _SpreadIntroPageState extends ConsumerState<SpreadIntroPage> {
   /// 显示付费选项对话框
   void _showPaymentOptionsDialog() {
     final dynamicTokens = ref.watch(dynamicTokensProvider);
-    
+    final strings = ref.read(appStringsProvider);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.star, color: dynamicTokens.primaryColor),
+            Icon(AppIcons.star, color: dynamicTokens.primaryColor),
             const SizedBox(width: 8),
-            const Text('占いサービス'),
+            Text(
+              strings.adRequiredTitle,
+              style: const TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600),
+            ),
           ],
         ),
+        scrollable: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
               'スプレッドをご利用いただくには、以下の方法をお選びください：',
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(color: DynamicTokens.textGrey600),
             ),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue[200]!),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.play_circle_outline, color: Colors.blue),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '広告を視聴して無料でご利用\n（1日最大3回まで）',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                ],
+            // 主按钮：プレミアムにアップグレード（品牌主色）
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showSubscriptionPurchaseDialog();
+              },
+              icon: const Icon(AppIcons.workspacePremium),
+              label: const Text('プレミアムにアップグレード'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: dynamicTokens.primaryColor,
+                foregroundColor: DynamicTokens.textWhite,
+                minimumSize: const Size.fromHeight(48),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.amber[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber[200]!),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.workspace_premium, color: Colors.amber),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'プレミアム会員で無制限利用',
-                          style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
-                        ),
-                        const Text(
-                          '広告なし',
-                          style: TextStyle(color: Colors.amber, fontSize: 12),
-                        ),
-                        const SizedBox(height: 4),
-                      ],
-                    ),
-                  ),
-                ],
+            // 次按钮：広告を見る（描边/区分样式）
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showAdAndProceed();
+              },
+              icon: const Icon(AppIcons.playCircleOutline),
+              label: const Text('広告をみる'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: dynamicTokens.primaryColor,
+                side: BorderSide(color: dynamicTokens.primaryColor, width: 2),
+                minimumSize: const Size.fromHeight(48),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                shape: const StadiumBorder(),
               ),
             ),
           ],
@@ -285,30 +272,9 @@ class _SpreadIntroPageState extends ConsumerState<SpreadIntroPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _showAdAndProceed();
-            },
-            icon: const Icon(Icons.play_circle_outline),
-            label: const Text('広告をみる'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _showSubscriptionPurchaseDialog();
-            },
-            icon: const Icon(Icons.workspace_premium),
-            label: const Text('プレミアムにアップグレード'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.amber,
-              foregroundColor: Colors.white,
+            child: const Text(
+              'キャンセル',
+              style: TextStyle(color: DynamicTokens.textGrey600),
             ),
           ),
         ],
@@ -353,7 +319,7 @@ class _SpreadIntroPageState extends ConsumerState<SpreadIntroPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        icon: const Icon(Icons.block, color: Colors.orange, size: 48),
+        icon: const Icon(AppIcons.block, color: DynamicTokens.textWarning, size: 48),
         title: const Text('本日の上限に達しました'),
         content: const Text(
           '今日の広告視聴回数（3回）に達しました。\n明日再度お試しいただくか、プレミアム購読をご検討ください。',

@@ -20,6 +20,8 @@ class AppStringsJa extends AppStringsBase {
   String get homeTarotCalendar => 'タロットカレンダー';
   @override
   String get homeTodayMessage => '今日のメッセージ';
+  @override
+  String get homeLongPressToDraw => '長押ししてカードを引く';
   
   // ==================== 占卜流程 ====================
   @override
@@ -32,6 +34,8 @@ class AppStringsJa extends AppStringsBase {
   String get readingQuestion => '質問';
   @override
   String get readingInterpretation => '解釈';
+  @override
+  String get labelQuestionPoints => '質問のポイント';
 
   // ==================== ページタイトル/タブ ====================
   @override
@@ -91,6 +95,8 @@ class AppStringsJa extends AppStringsBase {
   @override
   String get buttonConfirm => '確認';
   @override
+  String get buttonNext => '次へ';
+  @override
   String get buttonRedeemNow => '今すぐ引き換える';
   @override
   String get buttonCheckCode => 'コードを確認';
@@ -102,6 +108,8 @@ class AppStringsJa extends AppStringsBase {
   String get buttonDelete => '削除';
   @override
   String get buttonDrawAgain => 'もう一度占う';
+  @override
+  String get buttonDrawTodayCard => '本日のカードを引く';
   
   // ==================== 状态消息 ====================
   @override
@@ -341,29 +349,29 @@ class AppStringsJa extends AppStringsBase {
   @override
   String get messageSupabaseInitFailed => '⚠️ Supabase初始化失败';
   @override
-  String get messageUsingOfflineMode => '📱 使用离线模式';
+  String get messageUsingOfflineMode => '📱 オフラインモードを使用';
   @override
-  String get messageUserType => '📧 用户类型';
+  String get messageUserType => '📧 ユーザー種別';
   @override
-  String get messageNoUserSession => '🔐 没有用户会话';
+  String get messageNoUserSession => '🔐 ユーザーセッションなし';
   @override
-  String get messageCachedUserId => '🔍 缓存的用户ID';
+  String get messageCachedUserId => '🔍 キャッシュされたユーザーID';
   @override
-  String get messageLoginToRecoverData => '💡 登录以恢复数据';
+  String get messageLoginToRecoverData => '💡 ログインしてデータを復元';
   @override
-  String get messageDatabaseConnectionSuccess => '✅ 数据库连接成功';
+  String get messageDatabaseConnectionSuccess => '✅ データベース接続成功';
   @override
-  String get messageConnectionFailed => '⚠️ 连接失败';
+  String get messageConnectionFailed => '⚠️ 接続に失敗しました';
   @override
-  String get messageCurrentMode => '🔄 当前模式';
+  String get messageCurrentMode => '🔄 現在のモード';
   @override
-  String get labelOfflineMode => '离线模式';
+  String get labelOfflineMode => 'オフラインモード';
   @override
-  String get messageOfflineModeDescription => '💡 离线模式：数据仅保存在本地';
+  String get messageOfflineModeDescription => '💡 オフラインモード：データは端末内にのみ保存されます';
   @override
-  String get labelOnlineMode => '在线模式';
+  String get labelOnlineMode => 'オンラインモード';
   @override
-  String get messageSupabaseConnectionSuccess => '🎉 Supabase连接成功';
+  String get messageSupabaseConnectionSuccess => '🎉 Supabaseへの接続に成功しました';
   @override
   String get messageEnterRedemptionCode => '请输入兑换码';
   @override
@@ -454,6 +462,28 @@ class AppStringsJa extends AppStringsBase {
   String get labelEmotionConsciousness => '感情・意識';
   @override
   String get labelCauseSolution => '原因・解決策';
+  
+  // ==================== 抽牌/洗切牌 页面（Shuffle/Draw） ====================
+  @override
+  String get readingPreparing => 'カードを準備します';
+  @override
+  String get readingShuffling => 'カードをシャッフル中';
+  @override
+  String get readingCutting => 'カードをカット中';
+  @override
+  String get readingDrawing => 'カードを引いてください';
+  @override
+  String get readingResultTitle => '占い結果';
+  @override
+  String get readingComplete => '占い完了';
+  @override
+  String get hintSwipeUpToPick => '上にスワイプしてトップのカードを取る';
+  @override
+  String get hintDragToSlot => '上方向にドラッグしてスロットに入れる';
+  @override
+  String get errorDrawFailed => '抽出に失敗しました';
+  @override
+  String get buttonSeeResult => '結果を見る';
   @override
   String get readingTitle => '占い';
   @override

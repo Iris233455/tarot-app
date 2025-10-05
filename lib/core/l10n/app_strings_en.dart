@@ -20,6 +20,8 @@ class AppStringsEn extends AppStringsBase {
   String get homeTarotCalendar => 'Tarot Calendar';
   @override
   String get homeTodayMessage => 'Today\'s Message';
+  @override
+  String get homeLongPressToDraw => 'Long press to draw a card';
   
   // ==================== 占卜流程 ====================
   @override
@@ -32,6 +34,8 @@ class AppStringsEn extends AppStringsBase {
   String get readingQuestion => 'Question';
   @override
   String get readingInterpretation => 'Interpretation';
+  @override
+  String get labelQuestionPoints => 'Question Points';
 
   // ==================== Titles/Tabs ====================
   @override
@@ -91,6 +95,8 @@ class AppStringsEn extends AppStringsBase {
   @override
   String get buttonConfirm => 'Confirm';
   @override
+  String get buttonNext => 'Next';
+  @override
   String get buttonRedeemNow => 'Redeem Now';
   @override
   String get buttonCheckCode => 'Check Code';
@@ -102,6 +108,8 @@ class AppStringsEn extends AppStringsBase {
   String get buttonDelete => 'Delete';
   @override
   String get buttonDrawAgain => 'Draw Again';
+  @override
+  String get buttonDrawTodayCard => 'Draw today\'s card';
   
   // ==================== 状态消息 ====================
   @override
@@ -454,6 +462,28 @@ class AppStringsEn extends AppStringsBase {
   String get labelEmotionConsciousness => '';
   @override
   String get labelCauseSolution => '';
+  
+  // ==================== Shuffle/Draw page ====================
+  @override
+  String get readingPreparing => 'Preparing cards';
+  @override
+  String get readingShuffling => 'Shuffling cards';
+  @override
+  String get readingCutting => 'Cutting cards';
+  @override
+  String get readingDrawing => 'Please draw cards';
+  @override
+  String get readingResultTitle => 'Reading Result';
+  @override
+  String get readingComplete => 'Reading complete';
+  @override
+  String get hintSwipeUpToPick => 'Swipe up to pick the top card';
+  @override
+  String get hintDragToSlot => 'Drag upward to place into slot';
+  @override
+  String get errorDrawFailed => 'Failed to draw cards';
+  @override
+  String get buttonSeeResult => 'See Result';
   @override
   String get readingTitle => '';
   @override

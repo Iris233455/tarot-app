@@ -33,21 +33,9 @@ class AppTheme {
   static const double radiusXL = 24.0;
   
   // Shadows
-  static const List<BoxShadow> cardShadow = [
-    BoxShadow(
-      color: Color(0x1A000000),
-      blurRadius: 8,
-      offset: Offset(0, 2),
-    ),
-  ];
+  static const List<BoxShadow> cardShadow = [];
   
-  static const List<BoxShadow> elevatedShadow = [
-    BoxShadow(
-      color: Color(0x33000000),
-      blurRadius: 16,
-      offset: Offset(0, 4),
-    ),
-  ];
+  static const List<BoxShadow> elevatedShadow = [];
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -64,15 +52,14 @@ class AppTheme {
         surface: Colors.grey[50]!,
       ),
       cardTheme: const CardThemeData(
-        elevation: 2,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(radiusM)),
         ),
-        shadowColor: Colors.black12,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          elevation: 2,
+          elevation: 0,
           padding: const EdgeInsets.symmetric(
             horizontal: spacingL,
             vertical: spacingM,
@@ -84,8 +71,8 @@ class AppTheme {
       ),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
-          fontSize: fontSizeXXLarge,
-          fontWeight: FontWeight.bold,
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
         ),
         headlineMedium: TextStyle(
           fontSize: fontSizeXLarge,
@@ -116,15 +103,14 @@ class AppTheme {
         surface: surfaceColor,
       ),
       cardTheme: const CardThemeData(
-        elevation: 4,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(radiusM)),
         ),
-        shadowColor: Colors.black26,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          elevation: 4,
+          elevation: 0,
           padding: const EdgeInsets.symmetric(
             horizontal: spacingL,
             vertical: spacingM,
@@ -136,8 +122,8 @@ class AppTheme {
       ),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
-          fontSize: fontSizeXXLarge,
-          fontWeight: FontWeight.bold,
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
         ),
         headlineMedium: TextStyle(
           fontSize: fontSizeXLarge,

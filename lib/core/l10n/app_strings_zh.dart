@@ -20,6 +20,8 @@ class AppStringsZhCN extends AppStringsBase {
   String get homeTarotCalendar => '塔罗日历';
   @override
   String get homeTodayMessage => '今日讯息';
+  @override
+  String get homeLongPressToDraw => '长按抽牌';
   
   // ==================== 占卜流程 ====================
   @override
@@ -32,6 +34,8 @@ class AppStringsZhCN extends AppStringsBase {
   String get readingQuestion => '问题';
   @override
   String get readingInterpretation => '解读';
+  @override
+  String get labelQuestionPoints => '提问要点';
 
   // ==================== 页面标题/标签 ====================
   @override
@@ -91,6 +95,8 @@ class AppStringsZhCN extends AppStringsBase {
   @override
   String get buttonConfirm => '确认';
   @override
+  String get buttonNext => '下一步';
+  @override
   String get buttonRedeemNow => '立即兑换';
   @override
   String get buttonCheckCode => '检查代码';
@@ -102,6 +108,8 @@ class AppStringsZhCN extends AppStringsBase {
   String get buttonDelete => '删除';
   @override
   String get buttonDrawAgain => '再占一次';
+  @override
+  String get buttonDrawTodayCard => '抽取今日卡牌';
   
   // ==================== 状态消息 ====================
   @override
@@ -454,6 +462,28 @@ class AppStringsZhCN extends AppStringsBase {
   String get labelEmotionConsciousness => '';
   @override
   String get labelCauseSolution => '';
+  
+  // ==================== 抽牌/洗切牌 页面 ====================
+  @override
+  String get readingPreparing => '准备卡牌';
+  @override
+  String get readingShuffling => '洗牌中';
+  @override
+  String get readingCutting => '切牌中';
+  @override
+  String get readingDrawing => '请抽牌';
+  @override
+  String get readingResultTitle => '占卜结果';
+  @override
+  String get readingComplete => '占卜完成';
+  @override
+  String get hintSwipeUpToPick => '上滑取顶牌';
+  @override
+  String get hintDragToSlot => '向上拖拽放入槽位';
+  @override
+  String get errorDrawFailed => '抽牌失败';
+  @override
+  String get buttonSeeResult => '查看结果';
   @override
   String get readingTitle => '';
   @override

@@ -30,13 +30,7 @@ class LoadingOverlay extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  // no box shadows
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

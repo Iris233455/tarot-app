@@ -5,6 +5,9 @@ import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
 import 'package:mystic_tarot_jp/providers/tarot_providers.dart';
 import 'package:mystic_tarot_jp/widgets/themed_background.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
+import 'package:mystic_tarot_jp/core/ui/app_logo.dart';
+import 'package:mystic_tarot_jp/core/ui/app_return_icon.dart';
 
 class ReadingFlowShell extends ConsumerWidget {
   final Widget child;
@@ -17,95 +20,72 @@ class ReadingFlowShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dynamicTokens = ref.watch(dynamicTokensProvider);
+    final currentLocation = GoRouterState.of(context).uri.path;
     
     return Scaffold(
       extendBodyBehindAppBar: false, // 改为false避免透明问题
       backgroundColor: dynamicTokens.backgroundColor,
       resizeToAvoidBottomInset: true, // 标准键盘处理
       appBar: AppBar(
-        backgroundColor: dynamicTokens.backgroundColor, // 添加明确背景色
-        elevation: 1, // 轻微阴影增强固定效果
-        surfaceTintColor: Colors.transparent, // 避免Material 3的tint效果
-        scrolledUnderElevation: 1, // 滚动时保持固定外观
-        shadowColor: Colors.black.withOpacity(0.1), // 轻微阴影色
-        toolbarHeight: kToolbarHeight, // 确保标准高度
-        automaticallyImplyLeading: true, // 确保标准行为
-        titleSpacing: NavigationToolbar.kMiddleSpacing, // 标准标题间距
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: dynamicTokens.textPrimary),
-          onPressed: () {
-            final currentLocation = GoRouterState.of(context).uri.path;
-            
-            // 根据当前路径决定返回行为
-            switch (currentLocation) {
-              case '/reading':
-                // 如果在占い首页，返回主页
-                context.go('/');
-                break;
-              case '/reading/intro':
-                context.go('/reading');
-                break;
-              case '/reading/question':
-                // 如果在问题页面，返回占い首页
-                context.go('/reading/intro');
-                break;
-              case '/reading/shuffle':
-                // 如果在洗牌页面，返回问题页面
-                context.go('/reading/question');
-                break;
-              case '/reading/result':
-                // 如果在结果页面，返回洗牌页面
-                context.go('/reading/shuffle');
-                break;
-              default:
-                // 默认返回主页
-                context.go('/');
-            }
-          },
-        ),
-        title: Consumer(
-          builder: (context, ref, _) {
-            final currentLocation = GoRouterState.of(context).uri.path;
-            final readingFormat = ref.watch(readingFormatProvider);
-            
-            String titleText;
-            switch (currentLocation) {
-              case '/reading':
-                titleText = 'スプレットを選択';
-                break;
-              case '/reading/intro':
-                titleText = readingFormat.isNotEmpty ? readingFormat : 'スプレット';
-                break;
-              case '/reading/question':
-              case '/reading/shuffle':
-              case '/reading/result':
-                titleText = readingFormat.isNotEmpty ? readingFormat : 'タロット占い';
-                break;
-              default:
-                titleText = 'タロット占い';
-            }
-            
-            return Text(
-              titleText,
-              style: TextStyle(
-                color: dynamicTokens.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        backgroundColor: dynamicTokens.backgroundColor,
+        elevation: 2,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 2,
+        shadowColor: Colors.black.withOpacity(0.08),
+        toolbarHeight: kToolbarHeight,
+        automaticallyImplyLeading: false,
+        titleSpacing: NavigationToolbar.kMiddleSpacing,
+        leading: null,
+        title: currentLocation == '/reading'
+            ? InkWell(
+                onTap: () => context.go('/'),
+                customBorder: const CircleBorder(),
+                child: const AppLogo(size: 36),
+              )
+            : GestureDetector(
+                onTap: () {
+                  switch (currentLocation) {
+                    case '/reading/intro':
+                      context.go('/reading');
+                      break;
+                    case '/reading/question':
+                      context.go('/reading/intro');
+                      break;
+                    case '/reading/shuffle':
+                      context.go('/reading/question');
+                      break;
+                    case '/reading/result':
+                      context.go('/reading/shuffle');
+                      break;
+                    default:
+                      context.go('/');
+                  }
+                },
+                child: const AppReturnIcon(size: 36),
               ),
-            );
-          },
-        ),
         centerTitle: true,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
+              ? dynamicTokens.primaryColor.withOpacity(0.6)
+              : dynamicTokens.primaryColor.withOpacity(0.2),
+          ),
+        ),
       ),
       body: ThemedBackground(
-        child: child, // 完全移除SafeArea，让Scaffold自动处理
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: child, // 与首页首模块保持一致的顶部间距
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: dynamicTokens.backgroundColor, // 添加明确背景色
         currentIndex: 1,
-        selectedItemColor: dynamicTokens.primaryColor,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: DynamicTokens.textBlack87,
+        unselectedItemColor: DynamicTokens.textBlack87,
         onTap: (index) {
           switch (index) {
             case 0:
@@ -124,19 +104,19 @@ class ReadingFlowShell extends ConsumerWidget {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(AppIcons.home),
             label: '毎日の占い',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome),
+            icon: Icon(AppIcons.autoAwesome),
             label: 'スプレット',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.library_books),
+            icon: Icon(AppIcons.libraryBooks),
             label: 'ギャラリー',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.style),
+            icon: Icon(AppIcons.style),
             label: 'マイページ',
           ),
         ],

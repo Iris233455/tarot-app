@@ -19,8 +19,8 @@ class AppTheme {
       textTheme: TextTheme(
         headlineLarge: TextStyle(
           fontFamily: DesignTokens.fontFamilyHeadline,
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
           color: DesignTokens.textPrimary,
         ),
         headlineMedium: TextStyle(

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mystic_tarot_jp/services/supabase_service.dart';
+import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ReadingDetailScreen extends StatefulWidget {
   const ReadingDetailScreen({super.key, required this.readingId});
@@ -64,91 +67,105 @@ class _ReadingDetailScreenState extends State<ReadingDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('解釈の詳細'),
-        automaticallyImplyLeading: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-          tooltip: '戻る',
-        ),
-      ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _data == null
-              ? const Center(child: Text('記録が見つかりません'))
-              : Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // タイトル行（タイプ + 時刻）
-                        Row(
+    return Consumer(
+      builder: (context, ref, __) {
+        final dt = ref.watch(dynamicTokensProvider);
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('解釈の詳細'),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            shape: Border(
+              bottom: BorderSide(color: dt.primaryColor.withOpacity(0.12)),
+            ),
+            automaticallyImplyLeading: true,
+            leading: IconButton(
+              icon: const Icon(AppIcons.arrowBack),
+              onPressed: () => context.pop(),
+              tooltip: '戻る',
+            ),
+          ),
+          body: _loading
+              ? Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(dt.primaryColor),
+                  ),
+                )
+              : _data == null
+                  ? const Center(child: Text('記録が見つかりません'))
+                  : Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // タイトル行（タイプ + 時刻）
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: dt.primaryColor.withOpacity(0.08),
+                                    borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
+                                    border: Border.all(color: dt.primaryColor.withOpacity(0.22)),
+                                  ),
+                                  child: Text(
+                                    _typeLabel(_data!['spread_id'] ?? ''),
+                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  DateFormat('yyyy/MM/dd HH:mm').format(
+                                    DateTime.tryParse(_data!['created_at'] ?? '') ?? DateTime.now(),
+                                  ),
+                                  style: const TextStyle(color: DynamicTokens.textGrey600),
+                                ),
+                              ],
+                            ),
+                            
+                            // カード情報
+                            if (_cardDetails.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              _buildCardInfoSection(),
+                              const SizedBox(height: 8),
+                            ],
+                            const SizedBox(height: 16),
+                            // 質問
+                            if ((_data!['question'] ?? '').toString().isNotEmpty) ...[
+                              const Text('質問', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+                              const SizedBox(height: 6),
+                              Text(
+                                (_data!['question'] ?? '').toString(),
+                                style: const TextStyle(height: 1.5, color: DynamicTokens.textBlack87),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            // 解釈
+                            const Text('解釈', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+                            const SizedBox(height: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.deepPurple.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Colors.deepPurple.withOpacity(0.3)),
+                                color: dt.primaryColor.withOpacity(0.06),
+                                borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
+                                border: Border.all(color: dt.primaryColor.withOpacity(0.18)),
                               ),
                               child: Text(
-                                _typeLabel(_data!['spread_id'] ?? ''),
-                                style: const TextStyle(fontWeight: FontWeight.w700),
+                                _sanitizeInterpretationJP(
+                                  (_data!['interpretation'] ?? '').toString(),
+                                  (_data!['question'] ?? '').toString(),
+                                ),
+                                style: const TextStyle(fontSize: 14, height: 1.6, color: DynamicTokens.textBlack87),
                               ),
-                            ),
-                            const Spacer(),
-                            Text(
-                              DateFormat('yyyy/MM/dd HH:mm').format(
-                                DateTime.tryParse(_data!['created_at'] ?? '') ?? DateTime.now(),
-                              ),
-                              style: const TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
-                        
-                        // 卡片信息显示
-                        if (_cardDetails.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          _buildCardInfoSection(),
-                          const SizedBox(height: 8),
-                        ],
-                        const SizedBox(height: 16),
-                        // 質問（上部に表示）
-                        if ((_data!['question'] ?? '').toString().isNotEmpty) ...[
-                          const Text('質問', style: TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 6),
-                          Text(
-                            (_data!['question'] ?? '').toString(),
-                            style: const TextStyle(height: 1.5),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                        // 解釈
-                        const Text('解釈', style: TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 6),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Text(
-                            _sanitizeInterpretationJP(
-                              (_data!['interpretation'] ?? '').toString(),
-                              (_data!['question'] ?? '').toString(),
-                            ),
-                            style: const TextStyle(fontSize: 14, height: 1.6),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+        );
+      },
     );
   }
 

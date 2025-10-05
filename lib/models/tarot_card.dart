@@ -7,7 +7,7 @@ part 'tarot_card.g.dart';
 enum Arcana { major, wands, cups, swords, pentacles }
 
 @freezed
-class TarotCard with _$TarotCard {
+abstract class TarotCard with _$TarotCard {
   const TarotCard._();
 
   const factory TarotCard({
@@ -128,7 +128,7 @@ class TarotCard with _$TarotCard {
 
 // 添加花色信息模型
 @freezed
-class SuitInfo with _$SuitInfo {
+abstract class SuitInfo with _$SuitInfo {
   const factory SuitInfo({
     @JsonKey(name: 'suit_name_jp') required String nameJp,
     @JsonKey(name: 'suit_name_en') required String nameEn,
@@ -142,7 +142,7 @@ class SuitInfo with _$SuitInfo {
 
 // 添加占卜展开方式模型
 @freezed
-class SpreadInfo with _$SpreadInfo {
+abstract class SpreadInfo with _$SpreadInfo {
   const factory SpreadInfo({
     required String name,
     String? description,
@@ -155,7 +155,7 @@ class SpreadInfo with _$SpreadInfo {
 
 // 添加塔罗牌套牌模型
 @freezed
-class TarotDeck with _$TarotDeck {
+abstract class TarotDeck with _$TarotDeck {
   const TarotDeck._();
   
   const factory TarotDeck({
@@ -180,7 +180,7 @@ class TarotDeck with _$TarotDeck {
 
 // 扩展塔罗牌数据模型以支持多套牌
 @freezed
-class TarotDecksData with _$TarotDecksData {
+abstract class TarotDecksData with _$TarotDecksData {
   const factory TarotDecksData({
     required List<TarotDeck> decks,
   }) = _TarotDecksData;
@@ -191,7 +191,7 @@ class TarotDecksData with _$TarotDecksData {
 
 // 完整的塔罗牌数据模型
 @freezed
-class TarotData with _$TarotData {
+abstract class TarotData with _$TarotData {
   const factory TarotData({
     required List<TarotCard> cards,
     required Map<String, SuitInfo> suits,
@@ -204,7 +204,7 @@ class TarotData with _$TarotData {
 }
 
 @freezed
-class ReadingResult with _$ReadingResult {
+abstract class ReadingResult with _$ReadingResult {
   const factory ReadingResult({
     required String id,
     required String type,
@@ -220,7 +220,7 @@ class ReadingResult with _$ReadingResult {
 }
 
 @freezed
-class DailyCard with _$DailyCard {
+abstract class DailyCard with _$DailyCard {
   const factory DailyCard({
     required String id,
     required TarotCard card,
@@ -233,7 +233,7 @@ class DailyCard with _$DailyCard {
 }
 
 @freezed
-class UserSettings with _$UserSettings {
+abstract class UserSettings with _$UserSettings {
   const factory UserSettings({
     required String theme,
     required List<String> favoriteCards,

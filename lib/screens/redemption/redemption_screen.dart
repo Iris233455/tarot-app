@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mystic_tarot_jp/services/redemption_service.dart';
@@ -7,6 +8,8 @@ import 'package:mystic_tarot_jp/providers/subscription_provider.dart';
 import 'package:mystic_tarot_jp/providers/auth_state_provider.dart';
 import 'package:mystic_tarot_jp/widgets/loading_overlay.dart';
 import 'package:mystic_tarot_jp/screens/redemption/qr_scanner_screen.dart';
+import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 
 class RedemptionScreen extends ConsumerStatefulWidget {
   const RedemptionScreen({super.key});
@@ -151,7 +154,7 @@ class _RedemptionScreenState extends ConsumerState<RedemptionScreen> {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 32),
+            Icon(AppIcons.checkCircle, color: DynamicTokens.textSuccess, size: 32),
             SizedBox(width: 12),
             Text('引き換え完了！'),
           ],
@@ -166,22 +169,22 @@ class _RedemptionScreenState extends ConsumerState<RedemptionScreen> {
             ),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(DynamicTokens.spacingSm),
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green.shade200),
+                color: DynamicTokens.textSuccess.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(DynamicTokens.radiusSm),
+                border: Border.all(color: DynamicTokens.textSuccess.withOpacity(0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.star, color: Colors.green.shade600),
+                  Icon(AppIcons.star, color: DynamicTokens.textSuccess),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '${result.days}日間のプレミアムサービスを取得しました。',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green.shade700,
+                        fontWeight: FontWeight.w600,
+                        color: DynamicTokens.textSuccess,
                       ),
                     ),
                   ),
@@ -204,12 +207,12 @@ class _RedemptionScreenState extends ConsumerState<RedemptionScreen> {
               return subscriptionExpiry.when(
                 data: (expiry) => expiry != null
                     ? Padding(
-                        padding: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.only(right: DynamicTokens.spacingSm),
                         child: Text(
                           '新しい期限: ${expiry.year}/${expiry.month}/${expiry.day}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Colors.green,
+                            color: DynamicTokens.textSuccess,
                           ),
                         ),
                       )
@@ -264,38 +267,50 @@ class _RedemptionScreenState extends ConsumerState<RedemptionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('引き換えコード'),
+        title: const Row(
+          children: [
+            Icon(AppIcons.infoOutline, color: DynamicTokens.textInfo),
+            const SizedBox(width: 8),
+            Text(
+              '引き換えコード',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: DynamicTokens.textInfo,
+              ),
+            ),
+          ],
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.black87,
+        foregroundColor: DynamicTokens.textBlack87,
       ),
       body: LoadingOverlay(
         isLoading: _isLoading,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(DynamicTokens.spacingLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 说明文本
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(DynamicTokens.spacingMd),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade200),
+                  color: DynamicTokens.textInfo.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
+                  border: Border.all(color: DynamicTokens.textInfo.withOpacity(0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                                          Row(
+                    Row(
                       children: [
-                        Icon(Icons.info_outline, color: Colors.blue.shade600),
+                        Icon(AppIcons.infoOutline, color: DynamicTokens.textInfo),
                         const SizedBox(width: 8),
                         Text(
                           '引き換えコードについて',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade700,
+                            fontWeight: FontWeight.w600,
+                            color: DynamicTokens.textInfo,
                           ),
                         ),
                       ],
@@ -309,47 +324,45 @@ class _RedemptionScreenState extends ConsumerState<RedemptionScreen> {
                 ),
               ),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: DynamicTokens.spacingXl),
               
               // 兑换码输入
               Text(
                 '引き換えコードを入力',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: DynamicTokens.fontSizeTitleLarge, fontWeight: FontWeight.w600),
               ),
               
-              const SizedBox(height: 16),
+              const SizedBox(height: DynamicTokens.spacingMd),
               
               TextFormField(
                 controller: _codeController,
                 onChanged: _formatCodeInput,
                 decoration: InputDecoration(
                   hintText: '引き換えコードを入力してください',
-                  prefixIcon: const Icon(Icons.confirmation_number),
+                  prefixIcon: const Icon(AppIcons.confirmationNumber),
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.paste),
+                        icon: const Icon(AppIcons.paste),
                         onPressed: _pasteFromClipboard,
                         tooltip: 'ペースト',
                       ),
                       IconButton(
-                        icon: const Icon(Icons.qr_code_scanner),
+                        icon: const Icon(AppIcons.qrCodeScanner),
                         onPressed: _openQRScanner,
                         tooltip: 'スキャン',
                       ),
                     ],
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
                   ),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: DynamicTokens.textGrey500.withOpacity(0.06),
                 ),
-                style: const TextStyle(
-                  fontSize: 18,
+                style: TextStyle(
+                  fontSize: DynamicTokens.fontSizeTitleMedium,
                   letterSpacing: 2.0,
                   fontWeight: FontWeight.w500,
                 ),
@@ -357,55 +370,55 @@ class _RedemptionScreenState extends ConsumerState<RedemptionScreen> {
                 textCapitalization: TextCapitalization.characters,
               ),
               
-              const SizedBox(height: 16),
+              const SizedBox(height: DynamicTokens.spacingMd),
               
               // 错误或成功消息
               if (_errorMessage != null) ...[
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(DynamicTokens.spacingSm),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.shade200),
+                    color: DynamicTokens.textError.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(DynamicTokens.radiusSm),
+                    border: Border.all(color: DynamicTokens.textError.withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.error_outline, color: Colors.red.shade600),
+                      Icon(AppIcons.errorOutline, color: DynamicTokens.textError),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade700),
+                          style: TextStyle(color: DynamicTokens.textError),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: DynamicTokens.spacingMd),
               ],
               
               if (_successMessage != null) ...[
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(DynamicTokens.spacingSm),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.green.shade200),
+                    color: DynamicTokens.textSuccess.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(DynamicTokens.radiusSm),
+                    border: Border.all(color: DynamicTokens.textSuccess.withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.check_circle_outline, color: Colors.green.shade600),
+                      Icon(AppIcons.checkCircleOutline, color: DynamicTokens.textSuccess),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           _successMessage!,
-                          style: TextStyle(color: Colors.green.shade700),
+                          style: TextStyle(color: DynamicTokens.textSuccess),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: DynamicTokens.spacingMd),
               ],
               
               // 操作按钮
@@ -415,64 +428,62 @@ class _RedemptionScreenState extends ConsumerState<RedemptionScreen> {
                     child: OutlinedButton(
                       onPressed: _isLoading ? null : _checkCode,
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: DynamicTokens.spacingMd),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
                         ),
                       ),
                       child: const Text('コードを確認'),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: DynamicTokens.spacingSm),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: (_isLoading || _lastCheckResult?.success != true) 
                           ? null 
                           : _redeemCode,
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: DynamicTokens.spacingMd),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
                         ),
                       ),
                       child: const Text(
                         '今すぐ引き換える',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
                 ],
               ),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: DynamicTokens.spacingXl),
               
               // 使用说明
               Text(
                 '使用方法',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: DynamicTokens.fontSizeTitleMedium, fontWeight: FontWeight.w600),
               ),
               
-              const SizedBox(height: 12),
+              const SizedBox(height: DynamicTokens.spacingSm),
               
               const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _InfoItem(
-                    icon: Icons.info,
+                    icon: AppIcons.infoOutline,
                     text: '各引き換えコードは1回のみ使用可能です',
                   ),
                   _InfoItem(
-                    icon: Icons.schedule,
+                    icon: AppIcons.schedule,
                     text: '一部の引き換えコードには有効期限があります',
                   ),
                   _InfoItem(
-                    icon: Icons.person,
+                    icon: AppIcons.personAdd,
                     text: 'コードを利用する前にアカウントへログインしてください',
                   ),
                   _InfoItem(
-                    icon: Icons.add_circle,
+                    icon: AppIcons.checkCircle,
                     text: '引き換えた日数は現在のプレミアム期間に加算されます',
                   ),
                 ],
@@ -504,14 +515,14 @@ class _InfoItem extends StatelessWidget {
           Icon(
             icon,
             size: 16,
-            color: Colors.grey.shade600,
+            color: DynamicTokens.textGrey600,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
-                color: Colors.grey.shade700,
+                color: DynamicTokens.textGrey600,
                 height: 1.4,
               ),
             ),

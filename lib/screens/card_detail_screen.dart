@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mystic_tarot_jp/core/theme/app_theme.dart';
 import 'package:mystic_tarot_jp/providers/tarot_providers.dart';
 import 'package:mystic_tarot_jp/widgets/tarot_card_widget.dart';
+import 'package:mystic_tarot_jp/core/theme/dynamic_tokens.dart';
 
 class CardDetailScreen extends ConsumerWidget {
   final String cardId;
@@ -20,7 +22,7 @@ class CardDetailScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(AppIcons.arrowBack),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               context.pop();
@@ -55,13 +57,7 @@ class CardDetailScreen extends ConsumerWidget {
                       height: 350,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 15,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
+                        // no box shadows
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(AppTheme.radiusM),
@@ -73,7 +69,7 @@ class CardDetailScreen extends ConsumerWidget {
                               color: AppTheme.surfaceColor,
                               child: const Icon(
                                 Icons.image_not_supported,
-                                color: Colors.white54,
+                                color: DynamicTokens.textWhite54,
                                 size: 64,
                               ),
                             );
@@ -90,14 +86,14 @@ class CardDetailScreen extends ConsumerWidget {
                     card.nameJa,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: AppTheme.accentColor,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: AppTheme.spacingS),
                   Text(
                     card.nameEn,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white70,
+                      color: DynamicTokens.textWhite70,
                     ),
                   ),
                   
@@ -238,7 +234,7 @@ class CardDetailScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: DynamicTokens.textBlack87.withOpacity(0.07),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
         border: Border.all(
           color: AppTheme.accentColor.withOpacity(0.3),
@@ -280,9 +276,9 @@ class CardDetailScreen extends ConsumerWidget {
                         parsed['title']!,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: DynamicTokens.textWhite,
                           fontSize: AppTheme.fontSizeLarge,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           height: 1.6,
                         ),
                       ),
@@ -292,7 +288,7 @@ class CardDetailScreen extends ConsumerWidget {
                       Text(
                         parsed['content']!,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: DynamicTokens.textWhite,
                           fontSize: AppTheme.fontSizeMedium,
                           height: 1.6,
                         ),
@@ -302,7 +298,7 @@ class CardDetailScreen extends ConsumerWidget {
                     Text(
                       story,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: DynamicTokens.textWhite,
                         fontSize: AppTheme.fontSizeMedium,
                         height: 1.6,
                       ),
@@ -322,7 +318,7 @@ class CardDetailScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: DynamicTokens.textBlack87.withOpacity(0.07),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
         border: Border.all(
           color: color.withOpacity(0.3),
@@ -364,9 +360,9 @@ class CardDetailScreen extends ConsumerWidget {
                         parsed['title']!,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: DynamicTokens.textWhite,
                           fontSize: AppTheme.fontSizeLarge,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           height: 1.5,
                         ),
                       ),
@@ -376,7 +372,7 @@ class CardDetailScreen extends ConsumerWidget {
                       Text(
                         parsed['content']!,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: DynamicTokens.textWhite,
                           fontSize: AppTheme.fontSizeMedium,
                           height: 1.5,
                         ),
@@ -386,7 +382,7 @@ class CardDetailScreen extends ConsumerWidget {
                     Text(
                       meaning,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: DynamicTokens.textWhite,
                         fontSize: AppTheme.fontSizeMedium,
                         height: 1.5,
                       ),
@@ -454,7 +450,7 @@ class CardDetailScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: DynamicTokens.textBlack87.withOpacity(0.07),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
       ),
       child: Column(
@@ -464,7 +460,7 @@ class CardDetailScreen extends ConsumerWidget {
             theme,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: AppTheme.secondaryColor,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: AppTheme.spacingM),
@@ -496,7 +492,7 @@ class CardDetailScreen extends ConsumerWidget {
                       style: TextStyle(
                         color: AppTheme.primaryColor,
                         fontSize: AppTheme.fontSizeSmall,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -505,7 +501,7 @@ class CardDetailScreen extends ConsumerWidget {
                 Text(
                   uprightMeaning,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: DynamicTokens.textWhite,
                     fontSize: AppTheme.fontSizeSmall,
                     height: 1.4,
                   ),
@@ -543,7 +539,7 @@ class CardDetailScreen extends ConsumerWidget {
                       style: TextStyle(
                         color: AppTheme.errorColor,
                         fontSize: AppTheme.fontSizeSmall,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -552,7 +548,7 @@ class CardDetailScreen extends ConsumerWidget {
                 Text(
                   reversedMeaning,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: DynamicTokens.textWhite,
                     fontSize: AppTheme.fontSizeSmall,
                     height: 1.4,
                   ),
@@ -570,7 +566,7 @@ class CardDetailScreen extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppTheme.spacingM),
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: DynamicTokens.textBlack87.withOpacity(0.07),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
       ),
       child: Column(
@@ -588,7 +584,7 @@ class CardDetailScreen extends ConsumerWidget {
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: AppTheme.accentColor,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
@@ -611,14 +607,14 @@ class CardDetailScreen extends ConsumerWidget {
                   style: TextStyle(
                     color: AppTheme.primaryColor,
                     fontSize: AppTheme.fontSizeSmall,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: AppTheme.spacingS),
                 Text(
                   uprightMessage,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: DynamicTokens.textWhite,
                     fontSize: AppTheme.fontSizeSmall,
                     height: 1.4,
                   ),
@@ -645,14 +641,14 @@ class CardDetailScreen extends ConsumerWidget {
                   style: TextStyle(
                     color: AppTheme.errorColor,
                     fontSize: AppTheme.fontSizeSmall,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: AppTheme.spacingS),
                 Text(
                   reversedMessage,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: DynamicTokens.textWhite,
                     fontSize: AppTheme.fontSizeSmall,
                     height: 1.4,
                   ),

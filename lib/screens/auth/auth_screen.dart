@@ -8,6 +8,7 @@ import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
 import 'package:mystic_tarot_jp/services/supabase_service.dart';
 import 'package:mystic_tarot_jp/core/config/supabase_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -206,11 +207,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   /// 显示成功提示
   void _showSuccessToast(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
+      const SnackBar(
+        content: Text('操作成功'),
+        backgroundColor: DynamicTokens.textSuccess,
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
+        duration: Duration(seconds: 2),
       ),
     );
   }
@@ -220,7 +221,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: DynamicTokens.textError,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
       ),
@@ -397,7 +398,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                       'Mystic Tarot',
                       style: theme.textTheme.headlineLarge?.copyWith(
                         color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -476,7 +477,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                           },
                           decoration: const InputDecoration(
                             labelText: 'メールアドレス',
-                            prefixIcon: Icon(Icons.email_outlined),
+                            prefixIcon: Icon(AppIcons.emailOutlined),
                           ),
                         ),
                         
@@ -494,9 +495,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                           },
                           decoration: InputDecoration(
                             labelText: 'パスワード',
-                            prefixIcon: const Icon(Icons.lock_outlined),
+                            prefixIcon: const Icon(AppIcons.lockOutlined),
                             suffixIcon: IconButton(
-                              icon: Icon(_passwordVisible ? Icons.visibility : Icons.visibility_off),
+                              icon: Icon(_passwordVisible ? AppIcons.visibility : AppIcons.visibilityOff),
                               onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
                             ),
                           ),
@@ -517,9 +518,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                             },
                             decoration: InputDecoration(
                               labelText: 'パスワード確認',
-                              prefixIcon: const Icon(Icons.lock_outlined),
+                              prefixIcon: const Icon(AppIcons.lockOutlined),
                               suffixIcon: IconButton(
-                                icon: Icon(_confirmPasswordVisible ? Icons.visibility : Icons.visibility_off),
+                                icon: Icon(_confirmPasswordVisible ? AppIcons.visibility : AppIcons.visibilityOff),
                                 onPressed: () => setState(() => _confirmPasswordVisible = !_confirmPasswordVisible),
                               ),
                             ),
@@ -633,16 +634,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                             height: 18,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white,
-                              border: Border.all(color: Colors.grey.shade300),
+                              color: DynamicTokens.textWhite,
+                              border: Border.all(color: DynamicTokens.textGrey600.withOpacity(0.3)),
                             ),
                             child: const Center(
                               child: Text(
                                 'G',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w600,
+                                  color: DynamicTokens.textInfo,
                                 ),
                               ),
                             ),

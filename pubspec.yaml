@@ -21,7 +21,7 @@ dependencies:
   hooks_riverpod: ^2.5.1
   
   # Code Generation
-  freezed_annotation: ^2.4.1
+  freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
   
   # Backend
@@ -35,6 +35,9 @@ dependencies:
   
   # UI & Animation
   animate_do: ^3.0.2
+  appinio_swiper: ^2.1.0
+  flip_card: ^0.7.0
+  lottie: ^3.1.2
   
   # Utils
   intl: ^0.20.2
@@ -51,6 +54,7 @@ dependencies:
   
   # Google Sign In
   google_sign_in: ^6.1.5
+  flutter_svg: ^2.0.10+1
 
 dev_dependencies:
   flutter_test:
@@ -58,9 +62,9 @@ dev_dependencies:
   mocktail: ^1.0.1
   
   # Code Generation
-  build_runner: any
-  freezed: any
-  json_serializable: any
+  build_runner: ^2.4.11
+  freezed: ^3.2.0
+  json_serializable: ^6.9.2
 
 flutter:
   uses-material-design: true
@@ -75,6 +79,7 @@ flutter:
     - assets/images/tarot/cat/
     - assets/images/back_designs/
     - assets/images/spreads/
+    - assets/icons/
   
   fonts:
     - family: NotoSerifJP

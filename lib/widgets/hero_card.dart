@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mystic_tarot_jp/themes/tokens.dart';
@@ -51,7 +52,7 @@ class HeroCard extends ConsumerWidget {
                       errorBuilder: (context, error, stackTrace) => Container(
                         color: Colors.grey[200],
                         child: const Center(
-                          child: Icon(Icons.image_not_supported, size: 48),
+                          child: Icon(AppIcons.imageNotSupported, size: 48),
                         ),
                       ),
                     ),

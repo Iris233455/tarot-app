@@ -9,6 +9,7 @@ import 'package:mystic_tarot_jp/themes/dynamic_tokens.dart';
 import 'package:mystic_tarot_jp/widgets/themed_background.dart';
 import 'package:mystic_tarot_jp/providers/theme_provider.dart';
 import 'package:mystic_tarot_jp/screens/redemption/redemption_screen.dart';
+import 'package:mystic_tarot_jp/core/l10n/localization_service.dart';
 import 'package:mystic_tarot_jp/tools/quick_test_setup.dart';
 import 'package:mystic_tarot_jp/providers/deck_provider.dart';
 import 'package:mystic_tarot_jp/services/card_back_service.dart';
@@ -21,6 +22,8 @@ import 'package:go_router/go_router.dart';
 import 'package:mystic_tarot_jp/providers/subscription_provider.dart';
 import 'package:mystic_tarot_jp/services/subscription_service.dart';
 import 'package:mystic_tarot_jp/widgets/subscription_purchase_dialog.dart';
+import 'package:mystic_tarot_jp/core/ui/app_icons.dart';
+import 'package:mystic_tarot_jp/core/ui/app_logo.dart';
 
 class MyDeckScreen extends ConsumerStatefulWidget {
   const MyDeckScreen({super.key});
@@ -70,6 +73,43 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   void dispose() {
     _audioPlayer.dispose();
     super.dispose();
+  }
+
+  // 统一的成功/失败提示样式
+  void _showSuccessSnackBar(String message, {Duration duration = const Duration(seconds: 2)}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: DynamicTokens.accentPremium,
+        duration: duration,
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(AppIcons.checkCircle, color: DynamicTokens.textWhite),
+            const SizedBox(width: 8),
+            Text(message, style: const TextStyle(color: DynamicTokens.textWhite)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showErrorSnackBar(String message, {Duration duration = const Duration(seconds: 3)}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: DynamicTokens.textError,
+        duration: duration,
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(AppIcons.errorOutline, color: DynamicTokens.textWhite),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message, style: const TextStyle(color: DynamicTokens.textWhite))),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _loadBackDesignSettings() async {
@@ -139,13 +179,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       
       // 显示成功提示
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ プロフィールを保存しました'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        _showSuccessSnackBar('プロフィールを保存しました');
       }
       
     } catch (e) {
@@ -153,18 +187,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       
       // 显示详细的错误信息
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ プロフィールの保存に失敗しました\n詳細: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-            action: SnackBarAction(
-              label: '再試行',
-              textColor: Colors.white,
-              onPressed: () => _saveProfileData(),
-            ),
-          ),
-        );
+        _showErrorSnackBar('プロフィールの保存に失敗しました\n詳細: ${e.toString()}');
       }
     }
   }
@@ -173,9 +196,33 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   Widget build(BuildContext context) {
     final dynamicTokens = ref.watch(dynamicTokensProvider);
     final currentTheme = ref.watch(currentThemeNameProvider);
+    final neutralTextColor = DynamicTokens.textBlack87;
     
     return Scaffold(
       backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        elevation: 2,
+        scrolledUnderElevation: 2,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.black.withOpacity(0.08),
+        centerTitle: true,
+        backgroundColor: dynamicTokens.backgroundColor,
+        title: InkWell(
+          onTap: () => context.go('/'),
+          customBorder: const CircleBorder(),
+          child: const AppLogo(size: 36),
+        ),
+        automaticallyImplyLeading: false,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
+              ? dynamicTokens.primaryColor.withOpacity(0.6)
+              : dynamicTokens.primaryColor.withOpacity(0.2),
+          ),
+        ),
+      ),
       body: ThemedBackground(
         child: SafeArea(
           child: ListView(
@@ -186,9 +233,10 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
               duration: DesignTokens.animationDuration,
               child: Text(
                 'マイページ',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: dynamicTokens.textPrimary,
+                style: TextStyle(
+                  fontSize: DynamicTokens.fontSizeHeadlineMedium,
+                  fontWeight: FontWeight.w600,
+                  color: neutralTextColor,
                 ),
               ),
             ),
@@ -220,8 +268,8 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 3,
-        selectedItemColor: dynamicTokens.primaryColor,
-        unselectedItemColor: dynamicTokens.textSecondary,
+        selectedItemColor: neutralTextColor,
+        unselectedItemColor: neutralTextColor,
         onTap: (index) {
           switch (index) {
             case 0:
@@ -240,19 +288,19 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(AppIcons.home),
             label: '毎日の占い',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.auto_awesome),
+            icon: Icon(AppIcons.autoAwesome),
             label: 'スプレット',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.library_books),
+            icon: Icon(AppIcons.libraryBooks),
             label: 'ギャラリー',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.style),
+            icon: Icon(AppIcons.style),
             label: 'マイページ',
           ),
         ],
@@ -279,13 +327,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             ),
             const Divider(),
             
-            // Avatar URL (暂时只读，未来可扩展为上传功能)
-            _buildProfileField(
-              label: 'Avatar URL',
-              value: '未対応',
-              onTap: null, // 暂时只读
-            ),
-            const Divider(),
+            // Avatar URL 隐藏（需求：不显示该项）
             
             // 名前
             _buildProfileField(
@@ -335,6 +377,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     final authState = ref.watch(authStateProvider);
     final dynamicTokens = ref.watch(dynamicTokensProvider);
     final hasActiveSubscription = ref.watch(hasActiveSubscriptionProvider);
+    final currentLanguage = ref.watch(localizationServiceProvider);
     
     return FadeInUp(
       duration: DynamicTokens.animationDuration,
@@ -370,30 +413,43 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
               
               const Divider(),
               
+              // 言語設定
+              ListTile(
+                leading: Icon(AppIcons.language, color: dynamicTokens.primaryColor),
+                title: const Text(
+                  '言語 / Language',
+                  style: TextStyle(color: DynamicTokens.textBlack87),
+                ),
+                subtitle: Text(
+                  currentLanguage.displayName,
+                  style: const TextStyle(color: DynamicTokens.textBlack87),
+                ),
+                trailing: const Icon(AppIcons.arrowForwardIos),
+                onTap: () => _showLanguageDialog(),
+              ),
+              
+              const Divider(),
+              
               // 用户ID + 未订阅时显示升级按钮
               ListTile(
-                title: Text(
+                title: const Text(
                   'ユーザーID',
-                  style: TextStyle(
-                    color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : dynamicTokens.textPrimary,
-                  ),
+                  style: TextStyle(color: DynamicTokens.textBlack87),
                 ),
                 subtitle: Text(
                   authState.userId ?? '不明',
-                  style: TextStyle(
-                    color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : dynamicTokens.textSecondary,
-                  ),
+                  style: const TextStyle(color: DynamicTokens.textBlack87),
                 ),
                 trailing: hasActiveSubscription.when(
                   data: (isActive) {
                     if (isActive) return null;
                     return OutlinedButton.icon(
                       onPressed: () => _showSubscriptionPurchaseDialog(),
-                      icon: const Icon(Icons.workspace_premium, size: 18),
+                      icon: const Icon(AppIcons.workspacePremium, size: 18),
                       label: const Text('プレミアム'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.amber.shade800,
-                        side: BorderSide(color: Colors.amber.shade600),
+                        foregroundColor: dynamicTokens.primaryColor,
+                        side: BorderSide(color: dynamicTokens.primaryColor),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
                     );
@@ -416,16 +472,16 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                   return Column(
                     children: [
                       ListTile(
-                        leading: Icon(Icons.manage_accounts, color: dynamicTokens.primaryColor),
-                        title: Text(
+                        leading: Icon(AppIcons.manageAccounts, color: dynamicTokens.primaryColor),
+                        title: const Text(
                           'プレミアム管理',
-                          style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
+                          style: TextStyle(color: DynamicTokens.textBlack87),
                         ),
-                        subtitle: Text(
+                        subtitle: const Text(
                           '購読の管理とキャンセル',
-                          style: TextStyle(color: dynamicTokens.isDark ? Colors.grey.shade600 : null),
+                          style: TextStyle(color: DynamicTokens.textBlack87),
                         ),
-                        trailing: const Icon(Icons.arrow_forward_ios),
+                        trailing: const Icon(AppIcons.arrowForwardIos),
                         onTap: () => _showSubscriptionManagementDialog(),
                       ),
                       const Divider(),
@@ -458,14 +514,8 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
               
               const Divider(),
               
-              // お気に入り
-              _buildProfileField(
-                label: 'お気に入り',
-                value: 'お気に入りの占い結果',
-                onTap: () => context.go('/favorites'),
-              ),
-              
-              const Divider(),
+              // お気に入り（隐藏）
+              // 已按要求隐藏该入口
               
               // 登出按钮
               _buildProfileField(
@@ -543,12 +593,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     }
     
     final userType = authState.isAnonymous ? 'ゲスト' : 'メール';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('認証状態を更新しました\nユーザータイプ: $userType\nメール: ${currentUser?.email}'),
-        duration: const Duration(seconds: 4),
-      ),
-    );
+    _showSuccessSnackBar('認証状態を更新しました\nユーザータイプ: $userType\nメール: ${currentUser?.email}', duration: const Duration(seconds: 4));
   }
   
   /// 测试Google OAuth (诊断用)
@@ -600,23 +645,13 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       print('   认证状态: ${authState.authState}');
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Google OAuthテスト完了\nコンソールログで詳細を確認\nユーザーID: ${currentUser?.id}'),
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        _showSuccessSnackBar('Google OAuthテスト完了\nコンソールログで詳細を確認\nユーザーID: ${currentUser?.id}', duration: const Duration(seconds: 5));
       }
       
     } catch (e) {
       print('❌ Google OAuth测试失败: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Google OAuthテスト失敗\nエラー: $e'),
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        _showErrorSnackBar('Google OAuthテスト失敗\nエラー: $e', duration: const Duration(seconds: 5));
       }
     }
   }
@@ -626,19 +661,17 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     // 先显示确认对话框
     final bool? confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('リセット'),
-        content: const Text('本日のカードをリセットして、新しいカードを引き直しますか？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('リセット'),
-          ),
-        ],
+      builder: (context) => _buildStyledDialog(
+        context: context,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Text('リセット', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+            SizedBox(height: 12),
+            Text('本日のカードをリセットして、新しいカードを引き直しますか？', style: TextStyle(color: DynamicTokens.textBlack87)),
+          ],
+        ),
       ),
     );
     
@@ -653,10 +686,17 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ 本日のカードをリセットしました。新しいカードを引くことができます！'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
+          SnackBar(
+            backgroundColor: DynamicTokens.accentPremium,
+            duration: const Duration(seconds: 3),
+            content: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(AppIcons.checkCircle, color: DynamicTokens.textWhite),
+                SizedBox(width: 8),
+                Expanded(child: Text('本日のカードをリセットしました。新しいカードを引くことができます！', style: TextStyle(color: DynamicTokens.textWhite))),
+              ],
+            ),
           ),
         );
       }
@@ -666,9 +706,16 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ リセットに失敗しました: $e'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
+            backgroundColor: DynamicTokens.textError,
+            duration: const Duration(seconds: 3),
+            content: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(AppIcons.errorOutline, color: DynamicTokens.textWhite),
+                const SizedBox(width: 8),
+                Expanded(child: Text('リセットに失敗しました: $e', style: const TextStyle(color: DynamicTokens.textWhite))),
+              ],
+            ),
           ),
         );
       }
@@ -696,9 +743,14 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             mainAxisSpacing: DynamicTokens.spacingMd,
             childAspectRatio: 1,
           ),
-          itemCount: AppThemes.themes.length,
+          itemCount: AppThemes.themes.keys
+              .where((k) => k == 'オーシャン' || k == 'ナイトスカイ' || k == 'ムーンライト')
+              .length,
           itemBuilder: (context, index) {
-            final themeName = AppThemes.themes.keys.elementAt(index);
+            final filteredKeys = AppThemes.themes.keys
+                .where((k) => k == 'オーシャン' || k == 'ナイトスカイ' || k == 'ムーンライト')
+                .toList();
+            final themeName = filteredKeys[index];
             final themeData = AppThemes.themes[themeName]!;
             final isSelected = currentTheme == themeName;
             
@@ -712,7 +764,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                   borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
                   border: isSelected 
                       ? Border.all(
-                          color: Colors.white,
+                          color: DynamicTokens.textWhite,
                           width: 3,
                         )
                       : null,
@@ -722,8 +774,8 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                   child: Text(
                     themeData.name,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      color: DynamicTokens.textWhite,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -748,48 +800,36 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
         child: Column(
           children: [
             ListTile(
-              leading: Icon(Icons.style, color: dynamicTokens.primaryColor),
-              title: Text('デッキを選択',
-                style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
+              leading: Icon(AppIcons.style, color: dynamicTokens.primaryColor),
+              title: const Text('デッキを選択',
+                style: TextStyle(color: DynamicTokens.textBlack87),
               ),
               subtitle: currentDeckAsync.when(
-                loading: () => Text('読み込み中...', 
-                  style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : null),
+                loading: () => const Text('読み込み中...', 
+                  style: TextStyle(color: DynamicTokens.textBlack87),
                 ),
-                error: (error, stack) => Text('使用するデッキを選択',
-                  style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : null),
+                error: (error, stack) => const Text('使用するデッキを選択',
+                  style: TextStyle(color: DynamicTokens.textBlack87),
                 ),
                 data: (currentDeck) => Text(currentDeck?.nameJp ?? '使用するデッキを選択',
-                  style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : null),
+                  style: const TextStyle(color: DynamicTokens.textBlack87),
                 ),
               ),
-              trailing: const Icon(Icons.arrow_forward_ios),
+              trailing: const Icon(AppIcons.arrowForwardIos),
               onTap: () {
                 context.push('/deck-selection');
               },
             ),
-            const Divider(),
+            // 背面デザイン機能を一時的に非表示
             ListTile(
-              leading: Icon(Icons.crop_portrait, color: dynamicTokens.primaryColor),
-              title: Text('背面デザイン',
-                style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
+              leading: Icon(AppIcons.shoppingCart, color: dynamicTokens.primaryColor),
+              title: const Text('リアルデッキを購入',
+                style: TextStyle(color: DynamicTokens.textBlack87),
               ),
-              subtitle: Text('$_selectedBackDesignName',
-                style: TextStyle(color: dynamicTokens.isDark ? Colors.grey.shade600 : null),
+              subtitle: const Text('実物のタロットカードを購入',
+                style: TextStyle(color: DynamicTokens.textBlack87),
               ),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () => _showBackDesignDialog(),
-            ),
-            const Divider(),
-            ListTile(
-              leading: Icon(Icons.shopping_cart, color: dynamicTokens.primaryColor),
-              title: Text('リアルデッキを購入',
-                style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
-              ),
-              subtitle: Text('実物のタロットカードを購入',
-                style: TextStyle(color: dynamicTokens.isDark ? Colors.grey.shade600 : null),
-              ),
-              trailing: const Icon(Icons.arrow_forward_ios),
+              trailing: const Icon(AppIcons.arrowForwardIos),
               onTap: () => _openBaseShop(),
             ),
           ],
@@ -810,24 +850,24 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
         child: Column(
           children: [
             ListTile(
-              leading: Icon(Icons.music_note, color: dynamicTokens.primaryColor),
-              title: Text('音楽',
-                style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
+              leading: Icon(AppIcons.musicNote, color: dynamicTokens.primaryColor),
+              title: const Text('音楽',
+                style: TextStyle(color: DynamicTokens.textBlack87),
               ),
               subtitle: Text('${_selectedBgm}',
-                style: TextStyle(color: dynamicTokens.isDark ? Colors.grey.shade600 : null),
+                style: const TextStyle(color: DynamicTokens.textBlack87),
               ),
-              trailing: const Icon(Icons.arrow_forward_ios),
+              trailing: const Icon(AppIcons.arrowForwardIos),
               onTap: () => _showBgmDialog(),
             ),
             const Divider(),
             SwitchListTile(
-              secondary: Icon(Icons.today, color: dynamicTokens.primaryColor),
-              title: Text('リマインダー',
-                style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
+              secondary: Icon(AppIcons.today, color: dynamicTokens.primaryColor),
+              title: const Text('リマインダー',
+                style: TextStyle(color: DynamicTokens.textBlack87),
               ),
-              subtitle: Text('リマインダー機能を有効にする',
-                style: TextStyle(color: dynamicTokens.isDark ? Colors.grey.shade600 : null),
+              subtitle: const Text('リマインダー機能を有効にする',
+                style: TextStyle(color: DynamicTokens.textBlack87),
               ),
               value: _dailyTarotEnabled,
               onChanged: (value) {
@@ -839,14 +879,14 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             ),
             const Divider(),
             ListTile(
-              leading: Icon(Icons.bug_report, color: dynamicTokens.primaryColor),
-              title: Text('バグを報告',
-                style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
+              leading: Icon(AppIcons.bugReport, color: dynamicTokens.primaryColor),
+              title: const Text('バグを報告',
+                style: TextStyle(color: DynamicTokens.textBlack87),
               ),
-              subtitle: Text('問題やバグを報告',
-                style: TextStyle(color: dynamicTokens.isDark ? Colors.grey.shade600 : null),
+              subtitle: const Text('問題やバグを報告',
+                style: TextStyle(color: DynamicTokens.textBlack87),
               ),
-              trailing: const Icon(Icons.arrow_forward_ios),
+              trailing: const Icon(AppIcons.arrowForwardIos),
               onTap: () => _showBugReportDialog(),
             ),
           ],
@@ -869,38 +909,33 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? [
-            // 有背景图的主题：使用高透明度白色背景
-            Colors.white.withOpacity(0.95),
-            Colors.white.withOpacity(0.90),
+            // 有背景图：使用 DesignTokens.surfaceColor 的高透明度背景
+            DesignTokens.surfaceColor.withOpacity(0.95),
+            DesignTokens.surfaceColor.withOpacity(0.90),
           ] : [
             // 纯色背景主题：保持原来的surface颜色
             dynamicTokens.surfaceColor.withOpacity(0.8),
             dynamicTokens.surfaceColor.withOpacity(0.6),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(DynamicTokens.radiusMd),
         border: Border.all(
           color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
             ? dynamicTokens.primaryColor.withOpacity(0.6)
             : dynamicTokens.primaryColor.withOpacity(0.2),
           width: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? 2 : 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        // no box shadows
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : dynamicTokens.textPrimary,
+            style: TextStyle(
+              fontSize: DynamicTokens.fontSizeTitleLarge,
+              fontWeight: FontWeight.w600,
+              color: DynamicTokens.textBlack87,
             ),
           ),
           const SizedBox(height: DynamicTokens.spacingMd),
@@ -919,19 +954,19 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     return ListTile(
       title: Text(
         label,
-        style: TextStyle(
-          color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : dynamicTokens.textPrimary,
+        style: const TextStyle(
+          color: DynamicTokens.textBlack87,
         ),
       ),
       subtitle: Text(
         value,
-        style: TextStyle(
-          color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : dynamicTokens.textSecondary,
+        style: const TextStyle(
+          color: DynamicTokens.textBlack87,
         ),
       ),
       trailing: onTap != null 
-          ? Icon(Icons.edit, color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : dynamicTokens.textSecondary) 
-          : Icon(Icons.info_outline, color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.grey.shade600 : dynamicTokens.textSecondary),
+          ? const Icon(AppIcons.edit, color: DynamicTokens.textBlack87)
+          : const Icon(AppIcons.infoOutline, color: DynamicTokens.textBlack87),
       onTap: onTap,
     );
   }
@@ -940,30 +975,33 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     final controller = TextEditingController(text: _name);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('名前を入力'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: '名前を入力してください',
-          ),
+      builder: (context) => _buildStyledDialog(
+        context: context,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('名前を入力', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(hintText: '名前を入力してください'),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _dialogSecondaryButton('キャンセル', () => Navigator.pop(context)),
+                const SizedBox(width: 8),
+                _dialogPrimaryButton('保存', () async {
+                    setState(() { _name = controller.text; });
+                    Navigator.pop(context);
+                    await _saveProfileData();
+                }),
+              ],
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              setState(() {
-                _name = controller.text;
-              });
-              Navigator.pop(context);
-              await _saveProfileData();
-            },
-            child: const Text('保存'),
-          ),
-        ],
       ),
     );
   }
@@ -973,11 +1011,14 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     final controller = TextEditingController(text: _openId);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('IDを入力'),
+      builder: (context) => _buildStyledDialog(
+        context: context,
         content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            const Text('IDを入力', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
             TextField(
               controller: controller,
               decoration: const InputDecoration(
@@ -986,38 +1027,27 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '※ IDは他のユーザーに表示される公開IDです',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+            const Text('※ IDは他のユーザーに表示される公開IDです', style: TextStyle(fontSize: 12, color: DynamicTokens.textBlack87)),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _dialogSecondaryButton('キャンセル', () => Navigator.pop(context)),
+                const SizedBox(width: 8),
+                _dialogPrimaryButton('保存', () async {
+                    try {
+                      await SupabaseService.updateOpenId(controller.text);
+                      setState(() { _openId = controller.text; });
+                      Navigator.pop(context);
+                        _showSuccessSnackBar('IDを更新しました');
+                    } catch (e) {
+                      _showErrorSnackBar('エラー: $e');
+                    }
+                }),
+              ],
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                // 直接更新Open ID到数据库
-                await SupabaseService.updateOpenId(controller.text);
-                setState(() {
-                  _openId = controller.text;
-                });
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('IDを更新しました')),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('エラー: $e')),
-                );
-              }
-            },
-            child: const Text('保存'),
-          ),
-        ],
       ),
     );
   }
@@ -1025,35 +1055,55 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   void _showGenderDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('性別を選択'),
+      builder: (context) => _buildStyledDialog(
+        context: context,
         content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: _genderOptions.map((gender) {
-            return RadioListTile<String>(
-              title: Text(gender),
-              value: gender,
-              groupValue: _gender,
-              onChanged: (value) async {
-                setState(() {
-                  _gender = value!;
-                });
-                Navigator.pop(context);
-                await _saveProfileData();
-              },
-            );
-          }).toList(),
+          children: [
+            const Text('性別を選択', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            ..._genderOptions.map((gender) => RadioListTile<String>(
+                  title: Text(gender, style: const TextStyle(color: DynamicTokens.textBlack87)),
+                  value: gender,
+                  groupValue: _gender,
+                  activeColor: ref.watch(dynamicTokensProvider).primaryColor,
+                  onChanged: (value) async {
+                    setState(() { _gender = value!; });
+                    Navigator.pop(context);
+                    await _saveProfileData();
+                  },
+                )),
+          ],
         ),
       ),
     );
   }
 
   void _showBirthDatePicker() {
+    final dt = ref.read(dynamicTokensProvider);
     showDatePicker(
       context: context,
       initialDate: _birthDate,
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: dt.primaryColor, // 选中高亮、OK按钮
+              onPrimary: DynamicTokens.textWhite,
+              surface: dt.surfaceColor,
+              onSurface: DynamicTokens.textBlack87,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: dt.primaryColor),
+            ),
+          ),
+          child: child!,
+        );
+      },
     ).then((date) async {
       if (date != null) {
         setState(() {
@@ -1068,30 +1118,33 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     final controller = TextEditingController(text: _occupation);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('職業を入力'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: '職業を入力してください',
-          ),
+      builder: (context) => _buildStyledDialog(
+        context: context,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('職業を入力', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(hintText: '職業を入力してください'),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _dialogSecondaryButton('キャンセル', () => Navigator.pop(context)),
+                const SizedBox(width: 8),
+                _dialogPrimaryButton('保存', () async {
+                  setState(() { _occupation = controller.text; });
+                  Navigator.pop(context);
+                  await _saveProfileData();
+                }),
+              ],
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              setState(() {
-                _occupation = controller.text;
-              });
-              Navigator.pop(context);
-              await _saveProfileData();
-            },
-            child: const Text('保存'),
-          ),
-        ],
       ),
     );
   }
@@ -1099,24 +1152,26 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   void _showRelationshipDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('恋愛関係を選択'),
+      builder: (context) => _buildStyledDialog(
+        context: context,
         content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: _relationshipOptions.map((relationship) {
-            return RadioListTile<String>(
-              title: Text(relationship),
-              value: relationship,
-              groupValue: _relationship,
-              onChanged: (value) async {
-                setState(() {
-                  _relationship = value!;
-                });
-                Navigator.pop(context);
-                await _saveProfileData();
-              },
-            );
-          }).toList(),
+          children: [
+            const Text('恋愛関係を選択', style: TextStyle(color: DynamicTokens.textBlack87, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            ..._relationshipOptions.map((relationship) => RadioListTile<String>(
+                  title: Text(relationship, style: const TextStyle(color: DynamicTokens.textBlack87)),
+                  value: relationship,
+                  groupValue: _relationship,
+                  activeColor: ref.watch(dynamicTokensProvider).primaryColor,
+                  onChanged: (value) async {
+                    setState(() { _relationship = value!; });
+                    Navigator.pop(context);
+                    await _saveProfileData();
+                  },
+                )),
+          ],
         ),
       ),
     );
@@ -1128,44 +1183,43 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('背面デザインを選択'),
+      builder: (context) => _buildStyledDialog(
+        context: context,
         content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: availableDesigns.map((design) {
-            return RadioListTile<String>(
-              title: Text(design['name']),
-              subtitle: design['type'] == 'default' && currentDeck != null
-                  ? Text('${currentDeck.nameJp}の背面')
-                  : Text(design['description']),
-              value: design['type'],
-              groupValue: _selectedBackDesign,
-              onChanged: (value) async {
-                if (value != null) {
-                  try {
-                    await CardBackService.setBackDesign(value);
-                    setState(() {
-                      _selectedBackDesign = value;
-                      _selectedBackDesignName = design['name'];
-                    });
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('背面デザインを「${design['name']}」に変更しました')),
-                      );
+          children: [
+            const Text('背面デザインを選択', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+            const SizedBox(height: 12),
+            ...availableDesigns.map((design) => RadioListTile<String>(
+                  title: Text(design['name']),
+                  subtitle: design['type'] == 'default' && currentDeck != null
+                      ? Text('${currentDeck.nameJp}の背面')
+                      : Text(design['description']),
+                  value: design['type'],
+                  groupValue: _selectedBackDesign,
+                  onChanged: (value) async {
+                    if (value != null) {
+                      try {
+                        await CardBackService.setBackDesign(value);
+                        setState(() {
+                          _selectedBackDesign = value;
+                          _selectedBackDesignName = design['name'];
+                        });
+                        if (mounted) {
+                          Navigator.pop(context);
+                          _showSuccessSnackBar('背面デザインを「${design['name']}」に変更しました');
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          Navigator.pop(context);
+                          _showErrorSnackBar('背面デザインの変更に失敗しました: $e');
+                        }
+                      }
                     }
-                  } catch (e) {
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('背面デザインの変更に失敗しました: $e')),
-                      );
-                    }
-                  }
-                }
-              },
-            );
-          }).toList(),
+                  },
+                )),
+          ],
         ),
       ),
     );
@@ -1174,23 +1228,25 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   void _showBgmDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('BGMを選択'),
+      builder: (context) => _buildStyledDialog(
+        context: context,
         content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          children: _bgmTracks.map((track) {
-            return RadioListTile<String>(
-              title: Text(track['name']),
-              value: track['name'],
-              groupValue: _selectedBgm,
-              onChanged: (value) {
-                setState(() {
-                  _selectedBgm = value!;
-                });
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
+          children: [
+            const Text('BGMを選択', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+            const SizedBox(height: 12),
+            ..._bgmTracks.map((track) => RadioListTile<String>(
+                  title: Text(track['name'], style: const TextStyle(color: DynamicTokens.textBlack87)),
+                  value: track['name'],
+                  groupValue: _selectedBgm,
+                  activeColor: ref.watch(dynamicTokensProvider).primaryColor,
+                  onChanged: (value) {
+                    setState(() { _selectedBgm = value!; });
+                    Navigator.pop(context);
+                  },
+                )),
+          ],
         ),
       ),
     );
@@ -1200,12 +1256,35 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     final controller = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('バグを報告'),
-        content: Column(
+      builder: (context) => _buildStyledDialog(
+        context: context,
+        content: Theme(
+          data: Theme.of(context).copyWith(
+            textSelectionTheme: TextSelectionThemeData(
+              cursorColor: ref.watch(dynamicTokensProvider).primaryColor,
+              selectionHandleColor: ref.watch(dynamicTokensProvider).primaryColor,
+              selectionColor: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.28),
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              labelStyle: const TextStyle(color: DynamicTokens.textBlack87),
+              floatingLabelStyle: TextStyle(color: ref.watch(dynamicTokensProvider).primaryColor),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: ref.watch(dynamicTokensProvider).primaryColor, width: 2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('問題やバグについて詳しく教えてください：'),
+            const Text('バグを報告', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+            const SizedBox(height: 12),
+            const Text('問題やバグについて詳しく教えてください：', style: TextStyle(color: DynamicTokens.textBlack87)),
             const SizedBox(height: 8),
             TextField(
               controller: controller,
@@ -1215,24 +1294,21 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _dialogSecondaryButton('キャンセル', () => Navigator.pop(context)),
+                const SizedBox(width: 8),
+                _dialogPrimaryButton('送信', () {
+                  Navigator.pop(context);
+                  _showSuccessSnackBar('バグ報告を送信しました。ありがとうございます。');
+                }),
+              ],
+            ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: バグ報告の送信処理
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('バグ報告を送信しました。ありがとうございます。')),
-              );
-            },
-            child: const Text('送信'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -1290,37 +1366,119 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   void _showLogoutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('ログアウト'),
-        content: const Text('ログアウトしますか？\n\n保存されていないデータは失われる可能性があります。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await ref.read(authStateProvider.notifier).signOut();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('ログアウトしました')),
-                  );
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('ログアウトに失敗しました: $e')),
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('ログアウト', style: TextStyle(color: Colors.white)),
-          ),
-        ],
+      builder: (context) => _buildStyledDialog(
+        context: context,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('ログアウト', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+            const SizedBox(height: 12),
+            const Text('ログアウトしますか？\n\n保存されていないデータは失われる可能性があります。'),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _dialogSecondaryButton('キャンセル', () => Navigator.pop(context)),
+                const SizedBox(width: 8),
+                _dialogPrimaryButton('ログアウト', () async {
+                  Navigator.pop(context);
+                  try {
+                    await ref.read(authStateProvider.notifier).signOut();
+                    if (mounted) {
+                      _showSuccessSnackBar('ログアウトしました');
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      _showErrorSnackBar('ログアウトに失敗しました: $e');
+                    }
+                  }
+                }),
+              ],
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  // 统一样式的弹窗容器（与首页/Gallery/Spread一致）
+  Widget _buildStyledDialog({required BuildContext context, required Widget content}) {
+    final dt = ref.watch(dynamicTokensProvider);
+    return Dialog(
+      backgroundColor: dt.backgroundColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 520, maxHeight: 760),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: (dt.isDark || dt.backgroundImage != null)
+                ? [DesignTokens.surfaceColor.withOpacity(0.95), DesignTokens.surfaceColor.withOpacity(0.90)]
+                : [dt.surfaceColor.withOpacity(0.8), dt.surfaceColor.withOpacity(0.6)],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: (dt.isDark || dt.backgroundImage != null)
+                ? dt.primaryColor.withOpacity(0.6)
+                : dt.primaryColor.withOpacity(0.2),
+            width: (dt.isDark || dt.backgroundImage != null) ? 2 : 1,
+          ),
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: SingleChildScrollView(child: content),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: SizedBox(
+                width: 24, // 原始约 48 的 0.5
+                height: 24,
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(AppIcons.close, size: 16),
+                  style: IconButton.styleFrom(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    minimumSize: const Size(24, 24),
+                    backgroundColor: DynamicTokens.textBlack87.withOpacity(0.1),
+                    foregroundColor: DynamicTokens.textGrey600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 统一弹窗按钮样式（与首页一致）
+  Widget _dialogPrimaryButton(String label, VoidCallback onPressed) {
+    final dt = ref.watch(dynamicTokensProvider);
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: dt.primaryColor,
+        foregroundColor: DynamicTokens.textWhite,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(label),
+    );
+  }
+
+  Widget _dialogSecondaryButton(String label, VoidCallback onPressed) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: DynamicTokens.textBlack87,
+      ),
+      child: Text(label),
     );
   }
   
@@ -1332,12 +1490,30 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('アカウント作成'),
-          content: Column(
+        builder: (context, setState) => _buildStyledDialog(
+          context: context,
+          content: Theme(
+            data: Theme.of(context).copyWith(
+              inputDecorationTheme: InputDecorationTheme(
+                labelStyle: const TextStyle(color: DynamicTokens.textBlack87),
+                floatingLabelStyle: TextStyle(color: ref.watch(dynamicTokensProvider).primaryColor),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.3)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: ref.watch(dynamicTokensProvider).primaryColor, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIconColor: DynamicTokens.textGrey600,
+              ),
+            ),
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text('アカウント作成', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+              const SizedBox(height: 12),
               const Text('現在のゲストデータをそのまま引き継ぎ、\nメールアカウントにアップグレードします：'),
               const SizedBox(height: 16),
               TextField(
@@ -1346,7 +1522,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                 decoration: const InputDecoration(
                   labelText: 'メールアドレス',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email_outlined),
+                  prefixIcon: Icon(AppIcons.emailOutlined),
                 ),
               ),
               const SizedBox(height: 12),
@@ -1356,13 +1532,43 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                 decoration: const InputDecoration(
                   labelText: 'パスワード (6文字以上)',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock_outlined),
+                  prefixIcon: Icon(AppIcons.lockOutlined),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                '✅ すべてのデータが引き継がれます\n✅ 同一ユーザーIDを継続利用できます\n✅ データが安全に保存されます',
-                style: TextStyle(fontSize: 12, color: Colors.green),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(AppIcons.checkCircle, size: 16, color: ref.watch(dynamicTokensProvider).primaryColor),
+                      const SizedBox(width: 6),
+                      const Expanded(
+                        child: Text('すべてのデータが引き継がれます', style: TextStyle(fontSize: 12, color: DynamicTokens.textBlack87)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(AppIcons.checkCircle, size: 16, color: ref.watch(dynamicTokensProvider).primaryColor),
+                      const SizedBox(width: 6),
+                      const Expanded(
+                        child: Text('同一ユーザーIDを継続利用できます', style: TextStyle(fontSize: 12, color: DynamicTokens.textBlack87)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(AppIcons.checkCircle, size: 16, color: ref.watch(dynamicTokensProvider).primaryColor),
+                      const SizedBox(width: 6),
+                      const Expanded(
+                        child: Text('データが安全に保存されます', style: TextStyle(fontSize: 12, color: DynamicTokens.textBlack87)),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               const Divider(),
@@ -1376,70 +1582,23 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                       Navigator.of(context).pop();
                       _showLoginDialog();
                     },
+                    style: TextButton.styleFrom(
+                      foregroundColor: ref.watch(dynamicTokensProvider).primaryColor,
+                    ),
                     child: const Text(
                       'ログイン',
                       style: TextStyle(
                         decoration: TextDecoration.underline,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                 ],
               ),
             ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: isLoading ? null : () => Navigator.pop(context),
-              child: const Text('キャンセル'),
-            ),
-            ElevatedButton(
-              onPressed: isLoading ? null : () async {
-                if (emailController.text.isEmpty || passwordController.text.length < 6) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('メールアドレスと6文字以上のパスワードを入力してください')),
-                  );
-                  return;
-                }
-                
-                setState(() => isLoading = true);
-                
-                try {
-                  // 升级账户
-                  await SupabaseService.upgradeAnonymousToEmail(
-                    emailController.text.trim(),
-                    passwordController.text,
-                  );
-                  
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('🎉 アカウントの作成が完了しました！\nすべてのデータが引き継がれます。'),
-                      duration: Duration(seconds: 4),
-                    ),
-                  );
-                  
-                  // 强制刷新状态以显示新的账户类型
-                  if (mounted) {
-                    this.setState(() {});
-                  }
-                  
-                } catch (e) {
-                  setState(() => isLoading = false);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('アップグレード失敗: $e')),
-                  );
-                }
-              },
-              child: isLoading 
-                ? const SizedBox(
-                    width: 20, 
-                    height: 20, 
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('アカウント作成'),
-            ),
-          ],
+          // 移除 actions；按钮已内置到 content 末尾
         ),
       ),
     );
@@ -1458,16 +1617,16 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
         if (isActive) {
           // 已有订阅，显示管理按钮
           return ListTile(
-            leading: Icon(Icons.manage_accounts, color: dynamicTokens.primaryColor),
+            leading: Icon(AppIcons.manageAccounts, color: dynamicTokens.primaryColor),
             title: Text(
               'プレミアム管理',
-              style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
+              style: const TextStyle(color: DynamicTokens.textBlack87),
             ),
             subtitle: Text(
               '購読の管理とキャンセル',
-              style: TextStyle(color: dynamicTokens.isDark ? Colors.grey.shade600 : null),
+              style: const TextStyle(color: DynamicTokens.textBlack87),
             ),
-            trailing: const Icon(Icons.arrow_forward_ios),
+            trailing: const Icon(AppIcons.arrowForwardIos),
             onTap: () => _showSubscriptionManagementDialog(),
           );
         } else {
@@ -1482,11 +1641,11 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                       height: 16, 
                       child: CircularProgressIndicator(strokeWidth: 2)
                     )
-                  : Icon(Icons.workspace_premium),
+                  : Icon(AppIcons.workspacePremium),
               label: Text(purchaseState.isLoading ? '処理中...' : 'プレミアムにアップグレード'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
-                foregroundColor: Colors.white,
+                backgroundColor: dynamicTokens.primaryColor,
+                foregroundColor: DynamicTokens.textWhite,
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
@@ -1497,12 +1656,12 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
         }
       },
       loading: () => ListTile(
-        leading: Icon(Icons.hourglass_empty, color: Colors.grey),
+        leading: Icon(AppIcons.hourglassEmpty, color: DynamicTokens.textGrey600),
         title: Text('読み込み中...'),
         subtitle: Text('購読状態を確認中'),
       ),
       error: (error, stack) => ListTile(
-        leading: Icon(Icons.error, color: Colors.red),
+        leading: Icon(AppIcons.error, color: DynamicTokens.textError),
         title: Text('エラー'),
         subtitle: Text('購読状態の取得に失敗しました'),
       ),
@@ -1514,16 +1673,24 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     final dynamicTokens = ref.watch(dynamicTokensProvider);
     
     return ListTile(
-      leading: Icon(Icons.confirmation_number, color: dynamicTokens.primaryColor),
+      leading: Icon(AppIcons.confirmationNumber, color: dynamicTokens.primaryColor),
       title: Text(
         '引き換えコード',
-        style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
+        style: TextStyle(
+          color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
+              ? DynamicTokens.textWhite
+              : DynamicTokens.textBlack87,
+        ),
       ),
       subtitle: Text(
         '引き換えコードを入力',
-        style: TextStyle(color: dynamicTokens.isDark ? Colors.grey.shade600 : null),
+        style: TextStyle(
+          color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null)
+              ? DynamicTokens.textWhite
+              : DynamicTokens.textBlack87,
+        ),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios),
+      trailing: const Icon(AppIcons.arrowForwardIos),
       onTap: () => _openRedemptionScreen(),
     );
   }
@@ -1550,17 +1717,20 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     final dynamicTokens = ref.watch(dynamicTokensProvider);
     
     return ListTile(
-      leading: Icon(Icons.build, color: Colors.orange.shade600),
-      title: Text(
+      leading: const Icon(AppIcons.build, color: DynamicTokens.textWarning),
+      title: const Text(
         '開発者ツール',
-        style: TextStyle(color: (dynamicTokens.isDark || dynamicTokens.backgroundImage != null) ? Colors.black87 : null),
+        style: TextStyle(color: DynamicTokens.textBlack87),
       ),
-      subtitle: Text(
+      subtitle: const Text(
         '引き換えコード診断・修復',
-        style: TextStyle(color: dynamicTokens.isDark ? Colors.grey.shade600 : null),
+        style: TextStyle(color: DynamicTokens.textBlack87),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios),
-      onTap: () => _showDeveloperToolsDialog(),
+      trailing: const Icon(
+        AppIcons.arrowForwardIos,
+        color: DynamicTokens.textBlack87,
+      ),
+      onTap: _showDeveloperToolsDialog,
     );
   }
   
@@ -1571,8 +1741,8 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.build, color: Colors.orange),
-            SizedBox(width: 8),
+            const Icon(AppIcons.build, color: DynamicTokens.textWarning),
+            const SizedBox(width: 8),
             Text('開発者ツール'),
           ],
         ),
@@ -1584,7 +1754,13 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             SizedBox(height: 8),
             Text('サブスクリプション状態をSupabaseと同期できます。'),
             SizedBox(height: 8),
-            Text('⚠️ この機能は開発モードでのみ利用可能です。'),
+            Row(
+              children: const [
+                Icon(AppIcons.warningAmber, size: 18, color: DynamicTokens.textWarning),
+                SizedBox(width: 6),
+                Expanded(child: Text('この機能は開発モードでのみ利用可能です。')),
+              ],
+            ),
           ],
         ),
         actions: [
@@ -1645,38 +1821,21 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       Navigator.of(context).pop();
       
       // 显示错误
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('診断に失敗しました: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorSnackBar('診断に失敗しました: $e');
     }
   }
   
   /// 强制同步订阅状态到Supabase
   Future<void> _syncSubscriptionToSupabase() async {
     try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('正在同步订阅状态到Supabase...')),
-      );
+      _showSuccessSnackBar('正在同步订阅状态到Supabase...', duration: const Duration(seconds: 2));
       
       // 强制从Supabase同步订阅状态
       await SubscriptionService.syncFromSupabase();
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✅ 订阅状态同步成功'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      _showSuccessSnackBar('✅ 订阅状态同步成功');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ 同步失败: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorSnackBar('❌ 同步失败: $e');
     }
   }
   
@@ -1691,7 +1850,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
           children: [
             Icon(
               hasIssues ? Icons.warning : Icons.check_circle,
-              color: hasIssues ? Colors.orange : Colors.green,
+              color: hasIssues ? DynamicTokens.textWarning : DynamicTokens.textSuccess,
             ),
             const SizedBox(width: 8),
             const Text('診断結果'),
@@ -1787,24 +1946,14 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
       Navigator.of(context).pop();
       
       // 显示成功消息
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('修復が完了しました！'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      _showSuccessSnackBar('修復が完了しました！');
       
     } catch (e) {
       // 关闭加载对话框
       Navigator.of(context).pop();
       
       // 显示错误
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('修復に失敗しました: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorSnackBar('修復に失敗しました: $e');
     }
   }
   
@@ -1812,13 +1961,13 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   void _showSubscriptionManagementDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('プレミアム管理'),
+      builder: (context) => _buildStyledDialog(
+        context: context,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.verified, color: Colors.green),
+              leading: const Icon(AppIcons.verified, color: Colors.green),
               title: const Text('ステータス'),
               subtitle: const Text('プレミアム有効'),
             ),
@@ -1833,12 +1982,12 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                     print('📅 [UI] 收到到期时间数据: $expiry');
                     return expiry != null
                         ? ListTile(
-                            leading: const Icon(Icons.schedule),
+                            leading: const Icon(AppIcons.schedule),
                             title: const Text('次回更新日'),
                             subtitle: Text('${expiry.year}年${expiry.month}月${expiry.day}日'),
                           )
                         : ListTile(
-                            leading: const Icon(Icons.schedule),
+                            leading: const Icon(AppIcons.schedule),
                             title: const Text('次回更新日'),
                             subtitle: const Text('期限なし'),
                           );
@@ -1846,7 +1995,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                   loading: () {
                     print('📅 [UI] 到期时间正在加载...');
                     return ListTile(
-                      leading: const Icon(Icons.schedule),
+                      leading: const Icon(AppIcons.schedule),
                       title: const Text('次回更新日'),
                       subtitle: const Text('読み込み中...'),
                     );
@@ -1854,7 +2003,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                   error: (error, stack) {
                     print('📅 [UI] 到期时间加载错误: $error');
                     return ListTile(
-                      leading: const Icon(Icons.schedule),
+                      leading: const Icon(AppIcons.schedule),
                       title: const Text('次回更新日'),
                       subtitle: Text('エラー: $error'),
                     );
@@ -1866,9 +2015,9 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             const Divider(),
             
             ListTile(
-              leading: const Icon(Icons.shopping_cart, color: Colors.amber),
-              title: const Text('プレミアムサービスを購入'),
-              subtitle: const Text('期間を延長または追加購入'),
+              leading: const Icon(AppIcons.shoppingCart, color: DynamicTokens.accentPremium),
+              title: const Text('プレミアムサービスを購入', style: TextStyle(color: DynamicTokens.textBlack87)),
+              subtitle: const Text('期間を延長または追加購入', style: TextStyle(color: DynamicTokens.textBlack87)),
               onTap: () {
                 Navigator.of(context).pop();
                 _showSubscriptionPurchaseDialog();
@@ -1876,9 +2025,9 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             ),
             
             ListTile(
-              leading: const Icon(Icons.restore, color: Colors.blue),
-              title: const Text('購入を復元'),
-              subtitle: const Text('他のデバイスでの購入を復元'),
+              leading: const Icon(AppIcons.restore, color: DynamicTokens.textInfo),
+              title: const Text('購入を復元', style: TextStyle(color: DynamicTokens.textBlack87)),
+              subtitle: const Text('他のデバイスでの購入を復元', style: TextStyle(color: DynamicTokens.textBlack87)),
               onTap: () {
                 Navigator.of(context).pop();
                 _restorePurchases();
@@ -1886,9 +2035,9 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             ),
             
             ListTile(
-              leading: const Icon(Icons.cancel, color: Colors.red),
-              title: const Text('購読をキャンセル'),
-              subtitle: const Text('次回更新日に自動停止'),
+              leading: const Icon(AppIcons.cancel, color: DynamicTokens.textError),
+              title: const Text('購読をキャンセル', style: TextStyle(color: DynamicTokens.textBlack87)),
+              subtitle: const Text('次回更新日に自動停止', style: TextStyle(color: DynamicTokens.textBlack87)),
               onTap: () {
                 Navigator.of(context).pop();
                 _cancelSubscription();
@@ -1896,22 +2045,6 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // 强制刷新Provider状态
-              ref.invalidate(subscriptionStatusProvider);
-              ref.invalidate(subscriptionExpiryProvider);
-              ref.invalidate(hasActiveSubscriptionProvider);
-              print('🔄 [UI] 手动刷新订阅状态');
-            },
-            child: const Text('更新'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('閉じる'),
-          ),
-        ],
       ),
     );
   }
@@ -1936,50 +2069,35 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
   void _showAnonymousUserWarning(String action) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.warning_amber, color: Colors.orange, size: 28),
-            const SizedBox(width: 8),
-            const Text('アカウント登録が必要'),
-          ],
-        ),
+      builder: (context) => _buildStyledDialog(
+        context: context,
         content: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              '${action}機能をご利用いただくには、メールアドレスでの登録が必要です。',
-              style: const TextStyle(fontSize: 16),
-            ),
+            const Text('アカウント登録が必要', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+            const SizedBox(height: 12),
+            Text('${action}機能をご利用いただくには、メールアドレスでの登録が必要です。', style: const TextStyle(color: DynamicTokens.textBlack87)),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.shade200),
+                border: Border.all(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.22)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.blue.shade600, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'ゲストアカウントの制限',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade800,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Text('• ログアウトすると履歴が失われます', style: TextStyle(fontSize: 14)),
-                  const Text('• デバイスを変更時にデータを引き継ぎません', style: TextStyle(fontSize: 14)),
-                  const Text('• データの復元ができません', style: TextStyle(fontSize: 14)),
+                children: const [
+                  Row(children: [
+                    Icon(AppIcons.infoOutline, color: DynamicTokens.textBlack87, size: 20),
+                    SizedBox(width: 8),
+                    Text('ゲストアカウントの制限', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+                  ]),
+                  SizedBox(height: 8),
+                  Text('• ログアウトすると履歴が失われます', style: TextStyle(fontSize: 14, color: DynamicTokens.textBlack87)),
+                  Text('• デバイスを変更時にデータを引き継ぎません', style: TextStyle(fontSize: 14, color: DynamicTokens.textBlack87)),
+                  Text('• データの復元ができません', style: TextStyle(fontSize: 14, color: DynamicTokens.textBlack87)),
                 ],
               ),
             ),
@@ -1987,53 +2105,46 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
+                color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.green.shade200),
+                border: Border.all(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.22)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.check_circle_outline, color: Colors.green.shade600, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'メール登録のメリット',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green.shade800,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Text('• 現在のデータをすべて保存できます', style: TextStyle(fontSize: 14)),
-                  const Text('• 複数デバイスでの利用が可能になります', style: TextStyle(fontSize: 14)),
-                  const Text('• データを安全にデータが保護できます', style: TextStyle(fontSize: 14)),
+                children: const [
+                  Row(children: [
+                    Icon(AppIcons.checkCircleOutline, color: DynamicTokens.textBlack87, size: 20),
+                    SizedBox(width: 8),
+                    Text('メール登録のメリット', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+                  ]),
+                  SizedBox(height: 8),
+                  Text('• 現在のデータをすべて保存できます', style: TextStyle(fontSize: 14, color: DynamicTokens.textBlack87)),
+                  Text('• 複数デバイスでの利用が可能になります', style: TextStyle(fontSize: 14, color: DynamicTokens.textBlack87)),
+                  Text('• データを安全にデータが保護できます', style: TextStyle(fontSize: 14, color: DynamicTokens.textBlack87)),
                 ],
               ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _dialogSecondaryButton('後で', () => Navigator.of(context).pop()),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: () { Navigator.of(context).pop(); _showUpgradeAccountDialog(); },
+                  icon: const Icon(AppIcons.personAdd),
+                  label: const Text('登録/ログイン'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ref.watch(dynamicTokensProvider).primaryColor,
+                    foregroundColor: DynamicTokens.textWhite,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('後で'),
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _showUpgradeAccountDialog();
-            },
-            icon: const Icon(Icons.person_add),
-            label: const Text('登録/ログイン'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -2047,13 +2158,31 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('ログイン'),
-          content: Column(
+        builder: (context, setState) => _buildStyledDialog(
+          context: context,
+          content: Theme(
+            data: Theme.of(context).copyWith(
+              inputDecorationTheme: InputDecorationTheme(
+                labelStyle: const TextStyle(color: DynamicTokens.textBlack87),
+                floatingLabelStyle: TextStyle(color: ref.watch(dynamicTokensProvider).primaryColor),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.3)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: ref.watch(dynamicTokensProvider).primaryColor, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIconColor: DynamicTokens.textGrey600,
+              ),
+            ),
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('既存のアカウントにログインします：'),
+              const Text('ログイン', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+              const SizedBox(height: 12),
+              const Text('既存のアカウントにログインします：', style: TextStyle(color: DynamicTokens.textBlack87)),
               const SizedBox(height: 16),
               TextField(
                 controller: emailController,
@@ -2061,7 +2190,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                 decoration: const InputDecoration(
                   labelText: 'メールアドレス',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email_outlined),
+                  prefixIcon: Icon(AppIcons.emailOutlined),
                 ),
               ),
               const SizedBox(height: 12),
@@ -2071,25 +2200,25 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
                 decoration: const InputDecoration(
                   labelText: 'パスワード',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock_outlined),
+                  prefixIcon: Icon(AppIcons.lockOutlined),
                 ),
               ),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.shade200),
+                  border: Border.all(color: ref.watch(dynamicTokensProvider).primaryColor.withOpacity(0.22)),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_amber, color: Colors.orange.shade600, size: 20),
+                    const Icon(AppIcons.infoOutline, color: DynamicTokens.textBlack87, size: 20),
                     const SizedBox(width: 8),
                     const Expanded(
                       child: Text(
                         'ログイン後、現在のゲストデータは失われます。',
-                        style: TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: 12, color: DynamicTokens.textBlack87),
                       ),
                     ),
                   ],
@@ -2101,96 +2230,93 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('アカウントをお持ちでない方は'),
+                  const Text('アカウントをお持ちでない方は', style: TextStyle(color: DynamicTokens.textBlack87)),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                       _showUpgradeAccountDialog();
                     },
+                    style: TextButton.styleFrom(
+                      foregroundColor: ref.watch(dynamicTokensProvider).primaryColor,
+                    ),
                     child: const Text(
                       '新規作成',
                       style: TextStyle(
                         decoration: TextDecoration.underline,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: isLoading ? null : () => Navigator.pop(context),
-              child: const Text('キャンセル'),
-            ),
-            ElevatedButton(
-              onPressed: isLoading ? null : () async {
-                if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('メールアドレスとパスワードを入力してください')),
-                  );
-                  return;
-                }
-                
-                setState(() => isLoading = true);
-                
-                try {
-                  // 邮箱登录
-                  final authNotifier = ref.read(authStateProvider.notifier);
-                  await authNotifier.signInWithEmail(
-                    emailController.text.trim(),
-                    passwordController.text,
-                  );
-                  
-                  if (mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('ログインが完了しました！'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    setState(() => isLoading = false);
-                    String errorMessage = 'ログインに失敗しました';
-                    
-                    if (e.toString().contains('Invalid login credentials')) {
-                      errorMessage = 'メールアドレスまたはパスワードが正しくありません';
-                    } else if (e.toString().contains('Email not confirmed')) {
-                      errorMessage = 'メール確認が必要です。受信したメールから確認してください';
-                    } else if (e.toString().contains('Too many requests')) {
-                      errorMessage = '試行回数が多すぎます。しばらく待ってから再度お試しください';
-                    }
-                    
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(errorMessage),
-                        backgroundColor: Colors.red,
-                        duration: const Duration(seconds: 4),
-                      ),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _dialogSecondaryButton('キャンセル', () => Navigator.pop(context)),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: isLoading ? null : () async {
+                      if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('メールアドレスとパスワードを入力してください')),
+                        );
+                        return;
+                      }
+                      
+                      setState(() => isLoading = true);
+                      
+                      try {
+                        // 邮箱登录
+                        final authNotifier = ref.read(authStateProvider.notifier);
+                        await authNotifier.signInWithEmail(
+                          emailController.text.trim(),
+                          passwordController.text,
+                        );
+                        
+                        if (mounted) {
+                          Navigator.pop(context);
+                          _showSuccessSnackBar('ログインが完了しました！');
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          setState(() => isLoading = false);
+                          String errorMessage = 'ログインに失敗しました';
+                          
+                          if (e.toString().contains('Invalid login credentials')) {
+                            errorMessage = 'メールアドレスまたはパスワードが正しくありません';
+                          } else if (e.toString().contains('Email not confirmed')) {
+                            errorMessage = 'メール確認が必要です。受信したメールから確認してください';
+                          } else if (e.toString().contains('Too many requests')) {
+                            errorMessage = '試行回数が多すぎます。しばらく待ってから再度お試しください';
+                          }
+                          
+                          _showErrorSnackBar(errorMessage, duration: const Duration(seconds: 4));
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ref.watch(dynamicTokensProvider).primaryColor,
+                      foregroundColor: DynamicTokens.textWhite,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(DynamicTokens.textWhite),
+                            ),
+                          )
+                        : const Text('ログイン'),
+                  ),
+                ],
               ),
-              child: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text('ログイン'),
+            ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -2224,7 +2350,7 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(backgroundColor: DynamicTokens.textError),
             child: const Text('キャンセル'),
           ),
         ],
@@ -2241,30 +2367,36 @@ class _MyDeckScreenState extends ConsumerState<MyDeckScreen> {
     }
   }
 
-  /// 显示成功提示
-  void _showSuccessSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
+  
 
-  /// 显示错误提示
-  void _showErrorSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
+  void _showLanguageDialog() {
+    final currentLang = ref.read(localizationServiceProvider);
+    showDialog(
+      context: context,
+      builder: (context) => _buildStyledDialog(
+        context: context,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('言語を選択', style: TextStyle(fontWeight: FontWeight.w600, color: DynamicTokens.textBlack87)),
+            const SizedBox(height: 12),
+            ...SupportedLanguage.values.map((lang) => RadioListTile<SupportedLanguage>(
+                  title: Text(lang.displayName, style: const TextStyle(color: DynamicTokens.textBlack87)),
+                  value: lang,
+                  groupValue: currentLang,
+                  activeColor: ref.watch(dynamicTokensProvider).primaryColor,
+                  onChanged: (value) async {
+                    if (value != null) {
+                      await ref.read(localizationServiceProvider.notifier).changeLanguage(value);
+                      if (mounted) Navigator.pop(context);
+                    }
+                  },
+                )),
+          ],
         ),
-      );
-    }
+      ),
+    );
   }
 }
 
